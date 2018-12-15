@@ -10,6 +10,7 @@ Hangman::Hangman(QWidget *parent) : QMainWindow(parent), ui(new Ui::Hangman) {
 
     connect(ui->connectButton, &QPushButton::clicked, this, &Hangman::connectButtonHit);
     connect(ui->hostLineEdit, &QLineEdit::returnPressed, ui->connectButton, &QPushButton::click);
+    connect(ui->readyButton, &QPushButton::clicked, this, &Hangman::readyButtonHit);
 }
 
 Hangman::~Hangman() {
@@ -41,8 +42,21 @@ void Hangman::connectButtonHit() {
 void Hangman::socketConnected() {
     connTimeoutTimer->stop();
     connTimeoutTimer->deleteLater();
+    ui->hangmanGroup->setEnabled(true);
 }
 
 void Hangman::readData() {
 
+}
+
+void Hangman::readyButtonHit() {
+    sendData('1');
+}
+
+void Hangman::sendData(char c) {
+    QString str = "";
+    str += c;
+    auto data = (str).toUtf8();
+
+    sock->write(data);
 }

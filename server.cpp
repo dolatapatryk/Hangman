@@ -18,7 +18,7 @@
 
 using namespace std;
 
-#define PLAYER_READY '1';
+char PLAYER_READY = '1';
 
 struct game{
 	string word;

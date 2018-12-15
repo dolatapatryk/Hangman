@@ -31,6 +31,8 @@ public:
     QLineEdit *hostLineEdit;
     QSpinBox *portSpinBox;
     QPushButton *connectButton;
+    QGroupBox *hangmanGroup;
+    QPushButton *readyButton;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -57,6 +59,13 @@ public:
         connectButton = new QPushButton(connectGroup);
         connectButton->setObjectName(QString::fromUtf8("connectButton"));
         connectButton->setGeometry(QRect(320, 10, 88, 34));
+        hangmanGroup = new QGroupBox(centralWidget);
+        hangmanGroup->setObjectName(QString::fromUtf8("hangmanGroup"));
+        hangmanGroup->setEnabled(false);
+        hangmanGroup->setGeometry(QRect(10, 70, 421, 421));
+        readyButton = new QPushButton(hangmanGroup);
+        readyButton->setObjectName(QString::fromUtf8("readyButton"));
+        readyButton->setGeometry(QRect(320, 170, 88, 34));
         Hangman->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(Hangman);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
@@ -80,6 +89,8 @@ public:
         connectGroup->setTitle(QString());
         hostLineEdit->setText(QApplication::translate("Hangman", "localhost", nullptr));
         connectButton->setText(QApplication::translate("Hangman", "connect", nullptr));
+        hangmanGroup->setTitle(QString());
+        readyButton->setText(QApplication::translate("Hangman", "Ready", nullptr));
     } // retranslateUi
 
 };

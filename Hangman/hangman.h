@@ -23,6 +23,8 @@ protected:
     void connectButtonHit();
     void socketConnected();
     void readData();
+    void readyButtonHit();
+    void sendData(char c);
 
 private:
     Ui::Hangman *ui;
