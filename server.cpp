@@ -61,6 +61,8 @@ bool checkPlayersReady();
 void readMessage();
 
 int main(int argc, char ** argv){
+	game.started = false;
+
 	// get and validate port number
 	if(argc != 2) error(1, 0, "Need 1 arg (port)");
 	auto port = readPort(argv[1]);
@@ -87,18 +89,26 @@ int main(int argc, char ** argv){
 	
 	//watek przyjmujacy nowe polaczenia
 	std::thread acceptThread(acceptNewConnection);
+	std::thread readThread(readMessage);
 
 	printf("odpalono serwer\n");
 	printf("czekamy na graczy\n");
 	
 	while(true){
-		if(clientFds.size() < 2) {
+		if(players.size() < 2) {
 			//continue;
 		}
 		
-		readMessage();
+		if(checkPlayersReady()) {
+			puts("gracze gotowi");
+		} else {
+			continue;
+		}
 		
-	}	
+		sleep(2);
+	}
+
+	puts("koniec");	
 }
 
 
@@ -154,6 +164,7 @@ void acceptNewConnection() {
 		clientFds.insert(clientFd);
 		player newPlayer;
 		newPlayer.fd = clientFd;
+		newPlayer.ready = false;
 		players.push_back(newPlayer);
 		
 		// tell who has connected
@@ -162,13 +173,21 @@ void acceptNewConnection() {
 }
 
 bool checkPlayersReady() {
-	for(player p: players) {
-		if(p.ready == false)
-			return false;
+	int allActive = true;
+	if(players.size() > 0) {
+		for(player p: players) {
+			if(p.ready == false) {
+				allActive = false;
+				break;
+			} else {
+			}
+		}
+	} else {
+		allActive = false;
 	}
-
-	return true;
+	return allActive;
 }
+
 
 // void readMessage() {
 // 	int count = 0;
@@ -196,22 +215,25 @@ bool checkPlayersReady() {
 // }
 
 void readMessage() {
-	int count = 0;
-	char buffer[255];
-	for(player p : players) {
-		count = read(p.fd, buffer, 255);
-		if(count < 1) {
-			printf("removing %d\n", p.fd);
-			clientFds.erase(p.fd);
-			//tu jeszcze usuwanie z wektora
-			close(p.fd);
-			continue;
-		} else {
-			//sendToAllBut(clientFd, buffer, count);
-			if(buffer[0] == PLAYER_READY) {
-				p.ready = true;
-				printf("player %d gotowy\n", p.fd);
-			}
-		}		
+	while(true) {
+		int count = 0;
+		for(player p : players) {
+			char buffer[255];
+			count = read(p.fd, buffer, 255);
+			if(count < 1) {
+				printf("removing %d\n", p.fd);
+				clientFds.erase(p.fd);
+				//tu jeszcze usuwanie z wektora
+				close(p.fd);
+				continue;
+			} else {
+				//sendToAllBut(clientFd, buffer, count);
+				if(buffer[0] == PLAYER_READY) {
+					puts("gotowy");
+					p.ready = true;
+					printf("player %d gotowy\n", p.fd);
+				}
+			}		
+		}
 	}
 }
