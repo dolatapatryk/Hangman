@@ -20,7 +20,7 @@ using namespace std;
 
 char PLAYER_READY = '1';
 
-struct game{
+struct gameProperties{
 	string word;
 	int lifes = 10;
 	bool started = false;
@@ -36,7 +36,7 @@ struct player{
 
 // server socket
 int servFd;
-game game;
+struct gameProperties game;
 
 // client sockets
 std::unordered_set<int> clientFds;
@@ -95,17 +95,17 @@ int main(int argc, char ** argv){
 	printf("czekamy na graczy\n");
 	
 	while(true){
-		if(players.size() < 2) {
-			//continue;
+		if(players.size() < 1) {
+			continue;
 		}
 		
 		if(checkPlayersReady()) {
 			puts("gracze gotowi");
+			break;
 		} else {
 			continue;
 		}
 		
-		sleep(2);
 	}
 
 	puts("koniec");	
@@ -162,10 +162,11 @@ void acceptNewConnection() {
 		
 		// add client to all clients set
 		clientFds.insert(clientFd);
-		player newPlayer;
+		struct player newPlayer;
 		newPlayer.fd = clientFd;
 		newPlayer.ready = false;
 		players.push_back(newPlayer);
+		printf("%d %d \n", newPlayer.fd, newPlayer.points);
 		
 		// tell who has connected
 		printf("new connection from: %s:%hu (fd: %d)\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), clientFd);
@@ -231,7 +232,8 @@ void readMessage() {
 				if(buffer[0] == PLAYER_READY) {
 					puts("gotowy");
 					p.ready = true;
-					printf("player %d gotowy\n", p.fd);
+					printf("player %d gotowy jego ready: %d\n", p.fd, p.ready);
+					printf("\n %d \n", checkPlayersReady());
 				}
 			}		
 		}
