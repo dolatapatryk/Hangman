@@ -46,7 +46,10 @@ void Hangman::socketConnected() {
 }
 
 void Hangman::readData() {
-
+    QByteArray dane = sock->read(512);
+    if(dane[0] == '1') {
+        ui->lettersGroup->setEnabled(true);
+    }
 }
 
 void Hangman::readyButtonHit() {

@@ -7,8 +7,6 @@
 #include <errno.h>
 #include <error.h>
 #include <netdb.h>
-#include <sys/epoll.h>
-#include <poll.h> 
 #include <thread>
 #include <unordered_set>
 #include <signal.h>
@@ -16,14 +14,23 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <fstream>
 
 using namespace std;
 
+#define BUFFOR_LENGTH 50
+#define LIFES 10
+
 char PLAYER_READY = '1';
+char GAME_STARTED = '1';
+
+string pathToWords = "./words";
 
 struct gameProperties{
-	string word;
-	int lifes = 10;
+	char word[BUFFOR_LENGTH];
+	char encoded[BUFFOR_LENGTH];
+	int wordLength = 0;
+	int lifes = LIFES;
 	bool started = false;
 };
 
@@ -31,7 +38,7 @@ struct playerInfo{
 	int fd;
 	string name;
 	int points = 0;
-	int lifes = 10;
+	int lifes = LIFES;
 	bool ready = false;
 };
 
@@ -47,9 +54,6 @@ std::map<int, playerInfo> playerMap;
 // handles SIGINT
 void ctrl_c(int);
 
-// sends data to clientFds excluding fd
-void sendToAllBut(int fd, char * buffer, int count);
-
 // converts cstring to port
 uint16_t readPort(char * txt);
 
@@ -61,6 +65,14 @@ void acceptNewConnection();
 bool checkPlayersReady();
 
 void readMessage();
+
+void getWord();
+
+void encode(string word);
+
+void sendToAll(char *buffer, int count);
+
+void send(int fd, char *buffer, int count);
 
 int main(int argc, char ** argv){
 	game.started = false;
@@ -104,7 +116,24 @@ int main(int argc, char ** argv){
 		
 		if(checkPlayersReady()) {
 			puts("gracze gotowi");
-			break;
+			game.started = true;
+			getWord();
+			printf("haslo: %s\n", game.word);
+			char buffer[1];
+			buffer[0] = GAME_STARTED;
+			sendToAll(buffer, 1);
+			while(true) {
+				if(game.lifes == 0) {
+					puts("przegrana");
+					game.started = false;
+					//tu jeszcze ze wszyscy gracze niegotowi
+				}
+				if(game.word == game.encoded) {
+					puts("wygrana");
+					game.started = false;
+					//tu jeszcze ze wszyscy niegotowi
+				}
+			}
 		} else {
 			continue;
 		}
@@ -112,6 +141,8 @@ int main(int argc, char ** argv){
 	}
 
 	puts("koniec");	
+	
+	exit(0);
 }
 
 
@@ -137,11 +168,10 @@ void ctrl_c(int){
 	exit(0);
 }
 
-void sendToAllBut(int fd, char * buffer, int count){
+void sendToAll(char * buffer, int count){
 	int res;
 	decltype(clientFds) bad;
 	for(int clientFd : clientFds){
-		if(clientFd == fd) continue;
 		res = write(clientFd, buffer, count);
 		if(res!=count)
 			bad.insert(clientFd);
@@ -150,6 +180,16 @@ void sendToAllBut(int fd, char * buffer, int count){
 		printf("removing %d\n", clientFd);
 		clientFds.erase(clientFd);
 		close(clientFd);
+	}
+}
+
+void send(int fd, char * buffer, int count){
+	int res;
+	res = write(fd, buffer, count);
+	if(res != count) {
+		printf("removing %d\n", fd);
+		clientFds.erase(fd);
+		close(fd);
 	}
 }
 
@@ -206,5 +246,31 @@ void readMessage() {
 				}
 			}		
 		}
+	}
+}
+
+void getWord() {
+	ifstream file;
+	file.open(pathToWords.c_str());
+	string line;
+
+	vector<string> lines;
+	while(getline(file, line)) {
+		lines.push_back(line);
+	}
+	file.close();
+
+	srand(time(NULL));
+	string temp = lines[rand()%lines.size()];
+	game.wordLength = temp.length();
+
+	encode(temp);
+}
+
+void encode(string word) {
+	for(int i = 0; i < game.wordLength; i++) {
+		game.word[i] = word[i];
+		if(game.word[i] <= 'Z' && game.word[i] >= 'A')
+			game.encoded[i] = '_';
 	}
 }
