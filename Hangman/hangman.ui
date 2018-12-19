@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>446</width>
+    <width>769</width>
     <height>553</height>
    </rect>
   </property>
@@ -507,13 +507,45 @@
      </property>
     </widget>
    </widget>
+   <widget class="QPushButton" name="testButton">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>50</y>
+      <width>80</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>test</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="picLabel">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>100</y>
+      <width>191</width>
+      <height>251</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>xddd</string>
+    </property>
+    <property name="pixmap">
+     <pixmap>pics/1.png</pixmap>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>446</width>
+     <width>769</width>
      <height>23</height>
     </rect>
    </property>

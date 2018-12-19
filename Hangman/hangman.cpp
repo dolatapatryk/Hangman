@@ -11,6 +11,10 @@ Hangman::Hangman(QWidget *parent) : QMainWindow(parent), ui(new Ui::Hangman) {
     connect(ui->connectButton, &QPushButton::clicked, this, &Hangman::connectButtonHit);
     connect(ui->hostLineEdit, &QLineEdit::returnPressed, ui->connectButton, &QPushButton::click);
     connect(ui->readyButton, &QPushButton::clicked, this, &Hangman::readyButtonHit);
+    connect(ui->testButton, &QPushButton::clicked, this, &Hangman::testPic);
+
+    ui->picLabel->setVisible(true);
+    testPic();
 }
 
 Hangman::~Hangman() {
@@ -43,17 +47,19 @@ void Hangman::socketConnected() {
     connTimeoutTimer->stop();
     connTimeoutTimer->deleteLater();
     ui->hangmanGroup->setEnabled(true);
+    ui->wordTextEdit->setEnabled(false);
+    ui->rankingList->setEnabled(false);
 }
 
 void Hangman::readData() {
     QByteArray dane = sock->read(512);
-    if(dane[0] == '1') {
+    if(dane[0] == GAME_STARTED) {
         ui->lettersGroup->setEnabled(true);
     }
 }
 
 void Hangman::readyButtonHit() {
-    sendData('1');
+    sendData(READY);
 }
 
 void Hangman::sendData(char c) {
@@ -62,4 +68,17 @@ void Hangman::sendData(char c) {
     auto data = (str).toUtf8();
 
     sock->write(data);
+}
+
+void Hangman::testPic() {
+    qDebug()<<"show";
+    qDebug()<<count;
+    QString filename = QString::fromStdString(picspath + to_string(count) + ".png");
+    qDebug()<<filename;
+    QPixmap pix;
+    if(pix.load(filename)){
+        pix = pix.scaled(ui->picLabel->size(),Qt::KeepAspectRatio);
+            ui->picLabel->setPixmap(pix);
+    }
+    count++;
 }

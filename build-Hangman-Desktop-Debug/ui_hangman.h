@@ -67,6 +67,8 @@ public:
     QLabel *rankingLabel;
     QLabel *wordLabel;
     QTextEdit *wordTextEdit;
+    QPushButton *testButton;
+    QLabel *picLabel;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -75,7 +77,7 @@ public:
     {
         if (Hangman->objectName().isEmpty())
             Hangman->setObjectName(QString::fromUtf8("Hangman"));
-        Hangman->resize(446, 553);
+        Hangman->resize(769, 553);
         centralWidget = new QWidget(Hangman);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         connectGroup = new QGroupBox(centralWidget);
@@ -196,10 +198,18 @@ public:
         wordTextEdit = new QTextEdit(hangmanGroup);
         wordTextEdit->setObjectName(QString::fromUtf8("wordTextEdit"));
         wordTextEdit->setGeometry(QRect(10, 50, 281, 31));
+        testButton = new QPushButton(centralWidget);
+        testButton->setObjectName(QString::fromUtf8("testButton"));
+        testButton->setGeometry(QRect(310, 50, 80, 26));
+        picLabel = new QLabel(centralWidget);
+        picLabel->setObjectName(QString::fromUtf8("picLabel"));
+        picLabel->setEnabled(true);
+        picLabel->setGeometry(QRect(510, 100, 191, 251));
+        picLabel->setPixmap(QPixmap(QString::fromUtf8("pics/1.png")));
         Hangman->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(Hangman);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 446, 23));
+        menuBar->setGeometry(QRect(0, 0, 769, 23));
         Hangman->setMenuBar(menuBar);
         mainToolBar = new QToolBar(Hangman);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -250,6 +260,8 @@ public:
         readyButton->setText(QApplication::translate("Hangman", "Ready", nullptr));
         rankingLabel->setText(QApplication::translate("Hangman", "Ranking", nullptr));
         wordLabel->setText(QApplication::translate("Hangman", "WORD", nullptr));
+        testButton->setText(QApplication::translate("Hangman", "test", nullptr));
+        picLabel->setText(QApplication::translate("Hangman", "xddd", nullptr));
     } // retranslateUi
 
 };
