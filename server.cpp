@@ -15,6 +15,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -26,7 +27,7 @@ struct gameProperties{
 	bool started = false;
 };
 
-struct player{
+struct playerInfo{
 	int fd;
 	string name;
 	int points = 0;
@@ -40,7 +41,8 @@ struct gameProperties game;
 
 // client sockets
 std::unordered_set<int> clientFds;
-std::vector<player> players;
+std::vector<playerInfo> players;
+std::map<int, playerInfo> playerMap;
 
 // handles SIGINT
 void ctrl_c(int);
@@ -62,6 +64,7 @@ void readMessage();
 
 int main(int argc, char ** argv){
 	game.started = false;
+	printf("game.started = %d", game.started);
 
 	// get and validate port number
 	if(argc != 2) error(1, 0, "Need 1 arg (port)");
@@ -95,7 +98,7 @@ int main(int argc, char ** argv){
 	printf("czekamy na graczy\n");
 	
 	while(true){
-		if(players.size() < 1) {
+		if(playerMap.size() < 1) {
 			continue;
 		}
 		
@@ -162,78 +165,44 @@ void acceptNewConnection() {
 		
 		// add client to all clients set
 		clientFds.insert(clientFd);
-		struct player newPlayer;
+		struct playerInfo newPlayer;
 		newPlayer.fd = clientFd;
 		newPlayer.ready = false;
-		players.push_back(newPlayer);
-		printf("%d %d \n", newPlayer.fd, newPlayer.points);
+		playerMap[clientFd] = newPlayer;
 		
-		// tell who has connected
 		printf("new connection from: %s:%hu (fd: %d)\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), clientFd);
 	}
 }
 
 bool checkPlayersReady() {
-	int allActive = true;
-	if(players.size() > 0) {
-		for(player p: players) {
-			if(p.ready == false) {
-				allActive = false;
-				break;
-			} else {
+	if(playerMap.size() > 0) {
+		for(map<int, playerInfo>::iterator it=playerMap.begin(); it!=playerMap.end();++it) {
+			if(it->second.ready == false) {
+				return false;
 			}
 		}
 	} else {
-		allActive = false;
+		return false;
 	}
-	return allActive;
-}
-
-
-// void readMessage() {
-// 	int count = 0;
-// 	char buffer[255];
-// 	for(int clientFd : clientFds) {
-// 		count = read(clientFd, buffer, 255);
-// 		if(count < 1) {
-// 			printf("removing %d\n", clientFd);
-// 			clientFds.erase(clientFd);
-// 			close(clientFd);
-// 			continue;
-// 		} else {
-// 			//sendToAllBut(clientFd, buffer, count);
-// 			if(buffer[0] == '1') {
-// 				for(player p : players) {
-// 					if(p.fd == clientFd) {
-// 						p.ready = true;
-// 						printf("player %d gotowy\n", p.fd);
-// 						break;
-// 					}
-// 				}
-// 			}
-// 		}		
-// 	}
-// }
+	return true;
+} 
 
 void readMessage() {
 	while(true) {
 		int count = 0;
-		for(player p : players) {
+		for(map<int, playerInfo>::iterator it=playerMap.begin(); it!=playerMap.end();++it) {
 			char buffer[255];
-			count = read(p.fd, buffer, 255);
+			count = read(it->first, buffer, 255);
 			if(count < 1) {
-				printf("removing %d\n", p.fd);
-				clientFds.erase(p.fd);
+				printf("removing %d\n", it->first);
+				clientFds.erase(it->first);
 				//tu jeszcze usuwanie z wektora
-				close(p.fd);
+				close(it->first);
 				continue;
 			} else {
-				//sendToAllBut(clientFd, buffer, count);
 				if(buffer[0] == PLAYER_READY) {
 					puts("gotowy");
-					p.ready = true;
-					printf("player %d gotowy jego ready: %d\n", p.fd, p.ready);
-					printf("\n %d \n", checkPlayersReady());
+					it->second.ready = true;
 				}
 			}		
 		}
