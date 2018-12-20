@@ -1,4 +1,6 @@
 #include <string>
+#include <map>
+#include "Player.h"
 
 using namespace std;
 
@@ -16,6 +18,7 @@ class Game {
         void setLifes(int n);
         bool isStarted();
         void setStarted(bool b);
+        map<int, Player> getPlayers();
         void makeWord();
         void encode(string s);
         const int LIFES = 10;
@@ -26,4 +29,5 @@ class Game {
 	    int wordLength;
 	    int lifes;
 	    bool started;
+        map<int, Player> players;
 };

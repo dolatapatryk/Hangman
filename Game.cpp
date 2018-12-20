@@ -11,43 +11,47 @@ Game::Game() {
 Game::~Game() {}
 
 char* Game::getWord() {
-    return word;
+    return this->word;
 }
 
 void Game::setWord(char* c) {
-    word = c;
+    this->word = c;
 }
 
 char* Game::getEncoded() {
-    return encoded;
+    return this->encoded;
 }
 
 void Game::setEncoded(char* c) {
-    encoded = c;
+    this->encoded = c;
 }
 
 int Game::getWordLength() {
-    return wordLength;
+    return this->wordLength;
 }
 
 void Game::setWordLength(int n) {
-    wordLength = n;
+    this->wordLength = n;
 }
 
 int Game::getLifes() {
-    return lifes;
+    return this->lifes;
 }
 
 void Game::setLifes(int n) {
-    lifes = n;
+    this->lifes = n;
 }
 
 bool Game::isStarted() {
-    return started;
+    return this->started;
 }
 
 void Game::setStarted(bool b) {
-    started = b;
+    this->started = b;
+}
+
+map<int, Player> Game::getPlayers() {
+    return this->players;
 }
 
 void Game::makeWord() {

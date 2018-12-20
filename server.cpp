@@ -15,7 +15,6 @@
 #include <vector>
 #include <map>
 #include <fstream>
-#include "Player.h"
 #include "Game.h"
 
 using namespace std;
