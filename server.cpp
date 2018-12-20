@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include "Player.h"
 
 using namespace std;
 

@@ -6,7 +6,7 @@ Player::Player(int n) {
     fd = n;
     lifes = LIFES;
     points = 0;
-    ready = false
+    ready = false;
 }
 
 Player::~Player() {}

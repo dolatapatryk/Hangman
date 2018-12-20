@@ -1,7 +1,7 @@
 class Player {
     public:
         Player();
-        Player(int n)
+        Player(int n);
         ~Player();
         int getFd();
         void setFd(int n);
@@ -18,4 +18,4 @@ class Player {
         int points;
         int lifes;
         bool ready;
-}
+};
