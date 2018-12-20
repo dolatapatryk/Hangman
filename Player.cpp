@@ -3,7 +3,7 @@
 Player::Player() {}
 
 Player::Player(int n) {
-    fd = n;
+    this->fd = n;
     lifes = LIFES;
     points = 0;
     ready = false;
@@ -12,7 +12,7 @@ Player::Player(int n) {
 Player::~Player() {}
 
 int Player::getFd() {
-    return fd;
+    return this->fd;
 }
 
 void Player::setFd(int n) {

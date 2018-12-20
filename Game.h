@@ -18,9 +18,10 @@ class Game {
         void setLifes(int n);
         bool isStarted();
         void setStarted(bool b);
-        map<int, Player> getPlayers();
+        map<int, Player*> getPlayers();
         void makeWord();
         void encode(string s);
+        void addPlayer(Player *player);
         const int LIFES = 10;
         string pathToWords = "./words";
     private:
@@ -29,5 +30,5 @@ class Game {
 	    int wordLength;
 	    int lifes;
 	    bool started;
-        map<int, Player> players;
+        map<int, Player*> players;
 };

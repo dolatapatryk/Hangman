@@ -11,7 +11,7 @@ class Player {
         void setLifes(int n);
         bool isReady();
         void setReady(bool b);
-        const int LIFES = 10;
+        int LIFES = 10;
     
     private:
         int fd;

@@ -205,19 +205,17 @@ void acceptNewConnection() {
 		
 		// add client to all clients set
 		clientFds.insert(clientFd);
-		struct playerInfo newPlayer;
-		newPlayer.fd = clientFd;
-		newPlayer.ready = false;
-		playerMap[clientFd] = newPlayer;
-		
+
+		Player *newPlayer = new Player(clientFd);
+		game1->addPlayer(newPlayer);
 		printf("new connection from: %s:%hu (fd: %d)\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), clientFd);
 	}
 }
 
 bool checkPlayersReady() {
-	if(playerMap.size() > 0) {
-		for(map<int, playerInfo>::iterator it=playerMap.begin(); it!=playerMap.end();++it) {
-			if(it->second.ready == false) {
+	if(game1->getPlayers().size() > 0) {
+		for(map<int, Player*>::iterator it=game1->getPlayers().begin(); it!=game1->getPlayers().end();++it) {
+			if(it->second->isReady() == false) {
 				return false;
 			}
 		}
@@ -230,7 +228,7 @@ bool checkPlayersReady() {
 void readMessage() {
 	while(true) {
 		int count = 0;
-		for(map<int, playerInfo>::iterator it=playerMap.begin(); it!=playerMap.end();++it) {
+		for(map<int, Player*>::iterator it=game1->getPlayers().begin(); it!=game1->getPlayers().end();++it) {
 			char buffer[255];
 			count = read(it->first, buffer, 255);
 			if(count < 1) {
@@ -242,9 +240,9 @@ void readMessage() {
 			} else {
 				if(buffer[0] == PLAYER_READY) {
 					puts("gotowy");
-					it->second.ready = true;
-				}
-			}		
+					it->second->setReady(true);
+				}		
+			}
 		}
 	}
 }

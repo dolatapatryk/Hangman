@@ -50,7 +50,7 @@ void Game::setStarted(bool b) {
     this->started = b;
 }
 
-map<int, Player> Game::getPlayers() {
+map<int, Player*> Game::getPlayers() {
     return this->players;
 }
 
@@ -78,4 +78,8 @@ void Game::encode(string s) {
 		if(this->word[i] <= 'Z' && this->word[i] >= 'A')
 			this->encoded[i] = '_';
 	}
+}
+
+void Game::addPlayer(Player *player) {
+    this->players.insert(make_pair(player->getFd(), player));
 }
