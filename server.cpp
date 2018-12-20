@@ -16,6 +16,7 @@
 #include <map>
 #include <fstream>
 #include "Player.h"
+#include "Game.h"
 
 using namespace std;
 
@@ -46,6 +47,7 @@ struct playerInfo{
 // server socket
 int servFd;
 struct gameProperties game;
+Game *game1 = new Game();
 
 // client sockets
 std::unordered_set<int> clientFds;
@@ -67,17 +69,13 @@ bool checkPlayersReady();
 
 void readMessage();
 
-void getWord();
-
-void encode(string word);
-
 void sendToAll(char *buffer, int count);
 
 void send(int fd, char *buffer, int count);
 
 int main(int argc, char ** argv){
-	game.started = false;
-	printf("game.started = %d", game.started);
+	//game.started = false;
+	game1->setStarted(false);
 
 	// get and validate port number
 	if(argc != 2) error(1, 0, "Need 1 arg (port)");
@@ -117,16 +115,17 @@ int main(int argc, char ** argv){
 		
 		if(checkPlayersReady()) {
 			puts("gracze gotowi");
-			game.started = true;
-			getWord();
+			//game.started = true;
+			game1->setStarted(true);
+			game1->makeWord();
 			printf("haslo: %s\n", game.word);
 			char buffer[1];
 			buffer[0] = GAME_STARTED;
 			sendToAll(buffer, 1);
 			while(true) {
-				if(game.lifes == 0) {
+				if(game1->getLifes() == 0) {
 					puts("przegrana");
-					game.started = false;
+					game1->setStarted(false);
 					//tu jeszcze ze wszyscy gracze niegotowi
 				}
 				if(game.word == game.encoded) {
@@ -165,6 +164,7 @@ void ctrl_c(int){
 	for(int clientFd : clientFds)
 		close(clientFd);
 	close(servFd);
+	delete game1;
 	printf("Closing server\n");
 	exit(0);
 }
@@ -247,31 +247,5 @@ void readMessage() {
 				}
 			}		
 		}
-	}
-}
-
-void getWord() {
-	ifstream file;
-	file.open(pathToWords.c_str());
-	string line;
-
-	vector<string> lines;
-	while(getline(file, line)) {
-		lines.push_back(line);
-	}
-	file.close();
-
-	srand(time(NULL));
-	string temp = lines[rand()%lines.size()];
-	game.wordLength = temp.length();
-
-	encode(temp);
-}
-
-void encode(string word) {
-	for(int i = 0; i < game.wordLength; i++) {
-		game.word[i] = word[i];
-		if(game.word[i] <= 'Z' && game.word[i] >= 'A')
-			game.encoded[i] = '_';
 	}
 }
