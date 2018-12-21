@@ -1,6 +1,7 @@
 #include "Game.h"
 #include <fstream>
 #include <vector>
+#include <cstring>
 
 Game::Game() {
     wordLength = 0;
@@ -55,8 +56,10 @@ map<int, Player*> Game::getPlayers() {
 }
 
 void Game::makeWord() {
+    puts("zaraz otwieram plik");
     ifstream file;
 	file.open(pathToWords.c_str());
+    puts("plik otwarty");
 	string line;
 
 	vector<string> lines;
@@ -64,6 +67,7 @@ void Game::makeWord() {
 		lines.push_back(line);
 	}
 	file.close();
+    puts("plik zamkniety");
 
 	srand(time(NULL));
 	string temp = lines[rand()%lines.size()];
@@ -73,13 +77,32 @@ void Game::makeWord() {
 }
 
 void Game::encode(string s) {
+    puts("zamierzam enkodowac");
+    this->word = new char[this->wordLength + 1];
+    this->encoded = new char[this->wordLength + 1];
+    
     for(int i = 0; i < this->wordLength; i++) {
+        printf("%c\n", s[i]);
 		this->word[i] = s[i];
 		if(this->word[i] <= 'Z' && this->word[i] >= 'A')
 			this->encoded[i] = '_';
 	}
+    puts("z enkodowane");
 }
 
 void Game::addPlayer(Player *player) {
     this->players.insert(make_pair(player->getFd(), player));
+}
+
+bool Game::checkPlayersReady() {
+    if(this->players.size() > 0) {
+        for(map<int, Player*>::iterator it=this->players.begin(); it!=this->players.end(); ++it) {
+            if(it->second->isReady() == false) {
+                return false;
+            }
+        }
+    } else {
+        return false;
+    }
+    return true;
 }

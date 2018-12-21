@@ -22,6 +22,7 @@ class Game {
         void makeWord();
         void encode(string s);
         void addPlayer(Player *player);
+        bool checkPlayersReady();
         const int LIFES = 10;
         string pathToWords = "./words";
     private:

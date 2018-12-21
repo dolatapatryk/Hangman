@@ -27,31 +27,13 @@ char GAME_STARTED = '1';
 
 string pathToWords = "./words";
 
-struct gameProperties{
-	char word[BUFFOR_LENGTH];
-	char encoded[BUFFOR_LENGTH];
-	int wordLength = 0;
-	int lifes = LIFES;
-	bool started = false;
-};
-
-struct playerInfo{
-	int fd;
-	string name;
-	int points = 0;
-	int lifes = LIFES;
-	bool ready = false;
-};
-
 // server socket
 int servFd;
-struct gameProperties game;
+//struct gameProperties game;
 Game *game1 = new Game();
 
 // client sockets
 std::unordered_set<int> clientFds;
-std::vector<playerInfo> players;
-std::map<int, playerInfo> playerMap;
 
 // handles SIGINT
 void ctrl_c(int);
@@ -73,7 +55,6 @@ void sendToAll(char *buffer, int count);
 void send(int fd, char *buffer, int count);
 
 int main(int argc, char ** argv){
-	//game.started = false;
 	game1->setStarted(false);
 
 	// get and validate port number
@@ -108,16 +89,17 @@ int main(int argc, char ** argv){
 	printf("czekamy na graczy\n");
 	
 	while(true){
-		if(playerMap.size() < 1) {
-			continue;
+		if(game1->getPlayers().size() < 1) {
+			//continue;
 		}
 		
-		if(checkPlayersReady()) {
+		if(game1->checkPlayersReady()) {
 			puts("gracze gotowi");
-			//game.started = true;
 			game1->setStarted(true);
+			puts("started");
 			game1->makeWord();
-			printf("haslo: %s\n", game.word);
+			puts("zrobione haslo");
+			printf("haslo: %s\n", game1->getWord());
 			char buffer[1];
 			buffer[0] = GAME_STARTED;
 			sendToAll(buffer, 1);
@@ -127,9 +109,9 @@ int main(int argc, char ** argv){
 					game1->setStarted(false);
 					//tu jeszcze ze wszyscy gracze niegotowi
 				}
-				if(game.word == game.encoded) {
+				if(game1->getWord() == game1->getEncoded()) {
 					puts("wygrana");
-					game.started = false;
+					game1->setStarted(false);
 					//tu jeszcze ze wszyscy niegotowi
 				}
 			}
@@ -211,19 +193,6 @@ void acceptNewConnection() {
 		printf("new connection from: %s:%hu (fd: %d)\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), clientFd);
 	}
 }
-
-bool checkPlayersReady() {
-	if(game1->getPlayers().size() > 0) {
-		for(map<int, Player*>::iterator it=game1->getPlayers().begin(); it!=game1->getPlayers().end();++it) {
-			if(it->second->isReady() == false) {
-				return false;
-			}
-		}
-	} else {
-		return false;
-	}
-	return true;
-} 
 
 void readMessage() {
 	while(true) {
