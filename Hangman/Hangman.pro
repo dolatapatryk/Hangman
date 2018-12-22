@@ -1,10 +1,11 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-12-15T18:20:53
+# Project created by QtCreator 2018-12-15T18:40:50
 #
 #-------------------------------------------------
 
 QT       += core gui
+QT += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -26,13 +27,13 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        hangman.cpp
 
 HEADERS += \
-        mainwindow.h
+        hangman.h
 
 FORMS += \
-        mainwindow.ui
+        hangman.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

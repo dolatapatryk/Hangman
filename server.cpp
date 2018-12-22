@@ -7,46 +7,36 @@
 #include <errno.h>
 #include <error.h>
 #include <netdb.h>
-#include <sys/epoll.h>
-#include <poll.h> 
 #include <thread>
 #include <unordered_set>
 #include <signal.h>
 #include <string>
 #include <iostream>
 #include <vector>
+#include <map>
+#include <fstream>
+#include "Game.h"
 
 using namespace std;
 
-#define PLAYER_READY '1';
+#define BUFFOR_LENGTH 50
+#define LIFES 10
 
-struct game{
-	string word;
-	int lifes = 10;
-	bool started = false;
-};
+char PLAYER_READY = '1';
+char GAME_STARTED = '1';
 
-struct player{
-	int fd;
-	string name;
-	int points = 0;
-	int lifes = 10;
-	bool ready = false;
-};
+string pathToWords = "./words";
 
 // server socket
 int servFd;
-game game;
+//struct gameProperties game;
+Game *game = new Game();
 
 // client sockets
 std::unordered_set<int> clientFds;
-std::vector<player> players;
 
 // handles SIGINT
 void ctrl_c(int);
-
-// sends data to clientFds excluding fd
-void sendToAllBut(int fd, char * buffer, int count);
 
 // converts cstring to port
 uint16_t readPort(char * txt);
@@ -60,7 +50,13 @@ bool checkPlayersReady();
 
 void readMessage();
 
+void sendToAll(char *buffer, int count);
+
+void send(int fd, char *buffer, int count);
+
 int main(int argc, char ** argv){
+	game->setStarted(false);
+
 	// get and validate port number
 	if(argc != 2) error(1, 0, "Need 1 arg (port)");
 	auto port = readPort(argv[1]);
@@ -87,18 +83,47 @@ int main(int argc, char ** argv){
 	
 	//watek przyjmujacy nowe polaczenia
 	std::thread acceptThread(acceptNewConnection);
+	std::thread readThread(readMessage);
 
 	printf("odpalono serwer\n");
 	printf("czekamy na graczy\n");
 	
 	while(true){
-		if(clientFds.size() < 2) {
+		if(game->getPlayers().size() < 1) {
 			//continue;
 		}
 		
-		readMessage();
+		if(game->checkPlayersReady()) {
+			puts("gracze gotowi");
+			game->setStarted(true);
+			puts("started");
+			game->makeWord();
+			puts("zrobione haslo");
+			printf("haslo: %s\n", game->getWord());
+			char buffer[1];
+			buffer[0] = GAME_STARTED;
+			sendToAll(buffer, 1);
+			while(true) {
+				if(game->getLifes() == 0) {
+					puts("przegrana");
+					game->setStarted(false);
+					//tu jeszcze ze wszyscy gracze niegotowi
+				}
+				if(game->getWord() == game->getEncoded()) {
+					puts("wygrana");
+					game->setStarted(false);
+					//tu jeszcze ze wszyscy niegotowi
+				}
+			}
+		} else {
+			continue;
+		}
 		
-	}	
+	}
+
+	puts("koniec");	
+	
+	exit(0);
 }
 
 
@@ -120,15 +145,15 @@ void ctrl_c(int){
 	for(int clientFd : clientFds)
 		close(clientFd);
 	close(servFd);
+	delete game;
 	printf("Closing server\n");
 	exit(0);
 }
 
-void sendToAllBut(int fd, char * buffer, int count){
+void sendToAll(char * buffer, int count){
 	int res;
 	decltype(clientFds) bad;
 	for(int clientFd : clientFds){
-		if(clientFd == fd) continue;
 		res = write(clientFd, buffer, count);
 		if(res!=count)
 			bad.insert(clientFd);
@@ -137,6 +162,16 @@ void sendToAllBut(int fd, char * buffer, int count){
 		printf("removing %d\n", clientFd);
 		clientFds.erase(clientFd);
 		close(clientFd);
+	}
+}
+
+void send(int fd, char * buffer, int count){
+	int res;
+	res = write(fd, buffer, count);
+	if(res != count) {
+		printf("removing %d\n", fd);
+		clientFds.erase(fd);
+		close(fd);
 	}
 }
 
@@ -152,66 +187,31 @@ void acceptNewConnection() {
 		
 		// add client to all clients set
 		clientFds.insert(clientFd);
-		player newPlayer;
-		newPlayer.fd = clientFd;
-		players.push_back(newPlayer);
-		
-		// tell who has connected
+
+		Player *newPlayer = new Player(clientFd);
+		game->addPlayer(newPlayer);
 		printf("new connection from: %s:%hu (fd: %d)\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), clientFd);
 	}
 }
 
-bool checkPlayersReady() {
-	for(player p: players) {
-		if(p.ready == false)
-			return false;
-	}
-
-	return true;
-}
-
-// void readMessage() {
-// 	int count = 0;
-// 	char buffer[255];
-// 	for(int clientFd : clientFds) {
-// 		count = read(clientFd, buffer, 255);
-// 		if(count < 1) {
-// 			printf("removing %d\n", clientFd);
-// 			clientFds.erase(clientFd);
-// 			close(clientFd);
-// 			continue;
-// 		} else {
-// 			//sendToAllBut(clientFd, buffer, count);
-// 			if(buffer[0] == '1') {
-// 				for(player p : players) {
-// 					if(p.fd == clientFd) {
-// 						p.ready = true;
-// 						printf("player %d gotowy\n", p.fd);
-// 						break;
-// 					}
-// 				}
-// 			}
-// 		}		
-// 	}
-// }
-
 void readMessage() {
-	int count = 0;
-	char buffer[255];
-	for(player p : players) {
-		count = read(p.fd, buffer, 255);
-		if(count < 1) {
-			printf("removing %d\n", p.fd);
-			clientFds.erase(p.fd);
-			//tu jeszcze usuwanie z wektora
-			close(p.fd);
-			continue;
-		} else {
-			//sendToAllBut(clientFd, buffer, count);
-			if(buffer[0] == PLAYER_READY) {
-				p.ready = true;
-				printf("player %d gotowy\n", p.fd);
+	while(true) {
+		int count = 0;
+		for(map<int, Player*>::iterator it=game->getPlayers().begin(); it!=game->getPlayers().end();++it) {
+			char buffer[255];
+			count = read(it->first, buffer, 255);
+			if(count < 1) {
+				printf("removing %d\n", it->first);
+				clientFds.erase(it->first);
+				//tu jeszcze usuwanie z wektora
+				close(it->first);
+				continue;
+			} else {
+				if(buffer[0] == PLAYER_READY) {
+					puts("gotowy");
+					it->second->setReady(true);
+				}		
 			}
-		}		
+		}
 	}
 }
