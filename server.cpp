@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <cstring>
 #include "Game.h"
 
 using namespace std;
@@ -23,7 +24,7 @@ using namespace std;
 #define LIFES 10
 
 char PLAYER_READY = '1';
-char GAME_STARTED = '1';
+string GAME_STARTED = "1";
 
 string pathToWords = "./words";
 
@@ -53,6 +54,8 @@ void readMessage();
 void sendToAll(char *buffer, int count);
 
 void send(int fd, char *buffer, int count);
+
+void sendWordToAll();
 
 int main(int argc, char ** argv){
 	game->setStarted(false);
@@ -100,9 +103,7 @@ int main(int argc, char ** argv){
 			game->makeWord();
 			puts("zrobione haslo");
 			printf("haslo: %s\n", game->getWord());
-			char buffer[1];
-			buffer[0] = GAME_STARTED;
-			sendToAll(buffer, 1);
+			sendWordToAll();
 			while(true) {
 				if(game->getLifes() == 0) {
 					puts("przegrana");
@@ -214,4 +215,18 @@ void readMessage() {
 			}
 		}
 	}
+}
+
+void sendWordToAll() {
+	int length = game->getWordLength() + 2;
+	char buffer[length];
+
+	strcpy(buffer, GAME_STARTED.c_str());
+	string wordLengthString = to_string(game->getWordLength());
+	strcat(buffer, wordLengthString.c_str());
+	for(int i = 0; i < game->getWordLength(); i++) {
+		buffer[i+2] = game->getEncoded()[i];
+	}
+	printf("wiadomosc: %s\n", buffer);
+	sendToAll(buffer, length);
 }

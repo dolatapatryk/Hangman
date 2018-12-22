@@ -1,7 +1,6 @@
 #include "Game.h"
 #include <fstream>
 #include <vector>
-#include <cstring>
 
 Game::Game() {
     wordLength = 0;
