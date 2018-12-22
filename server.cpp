@@ -245,7 +245,9 @@ void readMessage(int fd) {
 		if(buffer[0] == PLAYER_READY) {
 			puts("gotowy");
 			game->getPlayers().find(fd)->second->setReady(true);
-		}		
+		} else if (buffer[0] >= 'A' && buffer[0] <= 'Z') {
+			puts("dostalem literke");
+		}
 	}
 }
 
