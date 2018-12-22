@@ -58,6 +58,9 @@ void Hangman::readData() {
         }
         ui->wordTextEdit->append(QString::fromUtf8(word).trimmed());
         ui->wordTextEdit->setAlignment(Qt::AlignCenter);
+        QFont font("Noto Sans", 16);
+        font.setLetterSpacing(QFont::AbsoluteSpacing, 6);
+        ui->wordTextEdit->setFont(font);
     }
 }
 
