@@ -4,6 +4,7 @@
 #include <sstream>
 #include <set>
 #include <functional>
+#include <iostream>
 
 Game::Game() {
     wordLength = 0;
@@ -115,7 +116,10 @@ string Game::makeRanking() {
 
     Comparator comparator = 
         [](pair<int, Player*> elem1, pair<int, Player*> elem2) {
-            return elem1.second->getPoints() < elem2.second->getPoints();
+            if(elem1.second->getPoints() == elem2.second->getPoints())
+                return elem1.first < elem2.first;
+            else
+                return elem1.second->getPoints() > elem2.second->getPoints();
         };
     set<pair<int, Player*>, Comparator> setOfPlayers(this->players.begin(), this->players.end(), comparator);
 
@@ -126,6 +130,5 @@ string Game::makeRanking() {
             << " pkt\n";
         i++;
     }
-
     return ss.str();
 }

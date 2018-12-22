@@ -52,7 +52,7 @@ void Hangman::readData() {
     if(dane[0] == GAME_STARTED) {
         getWord(dane);
     } else if (dane[0] == GET_FD) {
-        getFd(dane);
+        getFdAndRanking(dane);
     } else if (dane[0] == GET_RANKING) {
         getRanking(dane);
     }
@@ -97,7 +97,6 @@ void Hangman::getFd(QByteArray dane) {
     }
     QString playerName = "GRACZ: " + QString::fromUtf8(fd).trimmed();
     ui->playerLabel->setText(playerName);
-    sendData(';');
 }
 
 void Hangman::getRanking(QByteArray dane) {
@@ -109,7 +108,42 @@ void Hangman::getRanking(QByteArray dane) {
     for(int i = 0; i< length; i++) {
         ranking[i] = dane[i+2+shift];
     }
+    ui->rankingTextEdit->clear();
     ui->rankingTextEdit->append(QString::fromUtf8(ranking));
+}
+
+void Hangman::getFdAndRanking(QByteArray dane) {
+    array<int, 2> lengthAndShift = getMessageLengthAndShift(dane);
+    int length = lengthAndShift[0];
+    int shift = lengthAndShift[1];
+
+    QByteArray fd;
+    for(int i = 0; i < length; i++) {
+        fd[i] = dane[i+2 + shift];
+    }
+    int lengthFd = length + 2 + shift;
+    QByteArray ranking;
+    for(int i = 0; i < dane.length(); i++) {
+        ranking[i] = dane[i + lengthFd];
+    }
+    getRanking(ranking);
+}
+
+void Hangman::getWordAndRanking(QByteArray dane) {
+    array<int, 2> lengthAndShift = getMessageLengthAndShift(dane);
+    int length = lengthAndShift[0];
+    int shift = lengthAndShift[1];
+    ui->lettersGroup->setEnabled(true);
+    QByteArray word;
+    for(int i = 0; i < length; i++) {
+        word[i] = dane[i+2+shift];
+    }
+    int lengthWord = length +2 +shift;
+    QByteArray ranking;
+    for(int i = 0; i < dane.length(); i++) {
+        ranking[i] = dane[i + lengthWord];
+    }
+    getRanking(ranking);
 }
 
 array<int,2> Hangman::getMessageLengthAndShift(QByteArray dane) {

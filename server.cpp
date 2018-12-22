@@ -17,6 +17,9 @@
 #include <fstream>
 #include <cstring>
 #include <poll.h>
+#include <set>
+#include <functional>
+#include <sstream>
 #include "Game.h"
 
 using namespace std;
@@ -98,7 +101,6 @@ int main(int argc, char ** argv){
 	if(res) error(1, errno, "listen failed");
 	
 	//watek przyjmujacy nowe polaczenia
-	//std::thread acceptThread(acceptNewConnection);
 	std::thread readThread(readPoll);
 	whatToWait[0].fd = servFd;
 	whatToWait[0].events = POLLIN;

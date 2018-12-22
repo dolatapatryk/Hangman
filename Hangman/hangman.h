@@ -38,6 +38,8 @@ protected:
     void getWord(QByteArray dane);
     void getFd(QByteArray dane);
     void getRanking(QByteArray dane);
+    void getFdAndRanking(QByteArray dane);
+    void getWordAndRanking(QByteArray dane);
     array<int, 2> getMessageLengthAndShift(QByteArray dane);
 private:
     Ui::Hangman *ui;
