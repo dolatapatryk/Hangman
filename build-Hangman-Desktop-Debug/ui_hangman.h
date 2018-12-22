@@ -14,7 +14,6 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
-#include <QtWidgets/QListView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
@@ -63,12 +62,11 @@ public:
     QPushButton *yButton;
     QPushButton *zButton;
     QPushButton *readyButton;
-    QListView *rankingList;
     QLabel *rankingLabel;
     QLabel *wordLabel;
     QTextEdit *wordTextEdit;
-    QPushButton *testButton;
-    QLabel *picLabel;
+    QTextEdit *rankingTextEdit;
+    QLabel *playerLabel;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -77,7 +75,7 @@ public:
     {
         if (Hangman->objectName().isEmpty())
             Hangman->setObjectName(QString::fromUtf8("Hangman"));
-        Hangman->resize(769, 553);
+        Hangman->resize(459, 553);
         centralWidget = new QWidget(Hangman);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         connectGroup = new QGroupBox(centralWidget);
@@ -186,9 +184,6 @@ public:
         readyButton = new QPushButton(hangmanGroup);
         readyButton->setObjectName(QString::fromUtf8("readyButton"));
         readyButton->setGeometry(QRect(20, 230, 88, 34));
-        rankingList = new QListView(hangmanGroup);
-        rankingList->setObjectName(QString::fromUtf8("rankingList"));
-        rankingList->setGeometry(QRect(260, 220, 141, 192));
         rankingLabel = new QLabel(hangmanGroup);
         rankingLabel->setObjectName(QString::fromUtf8("rankingLabel"));
         rankingLabel->setGeometry(QRect(260, 200, 58, 18));
@@ -197,19 +192,20 @@ public:
         wordLabel->setGeometry(QRect(30, 30, 58, 18));
         wordTextEdit = new QTextEdit(hangmanGroup);
         wordTextEdit->setObjectName(QString::fromUtf8("wordTextEdit"));
-        wordTextEdit->setGeometry(QRect(10, 50, 281, 31));
-        testButton = new QPushButton(centralWidget);
-        testButton->setObjectName(QString::fromUtf8("testButton"));
-        testButton->setGeometry(QRect(310, 50, 80, 26));
-        picLabel = new QLabel(centralWidget);
-        picLabel->setObjectName(QString::fromUtf8("picLabel"));
-        picLabel->setEnabled(true);
-        picLabel->setGeometry(QRect(510, 100, 191, 251));
-        picLabel->setPixmap(QPixmap(QString::fromUtf8("pics/1.png")));
+        wordTextEdit->setGeometry(QRect(10, 50, 281, 41));
+        QFont font;
+        font.setPointSize(16);
+        wordTextEdit->setFont(font);
+        rankingTextEdit = new QTextEdit(hangmanGroup);
+        rankingTextEdit->setObjectName(QString::fromUtf8("rankingTextEdit"));
+        rankingTextEdit->setGeometry(QRect(260, 230, 151, 181));
+        playerLabel = new QLabel(centralWidget);
+        playerLabel->setObjectName(QString::fromUtf8("playerLabel"));
+        playerLabel->setGeometry(QRect(120, 50, 151, 21));
         Hangman->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(Hangman);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 769, 23));
+        menuBar->setGeometry(QRect(0, 0, 459, 23));
         Hangman->setMenuBar(menuBar);
         mainToolBar = new QToolBar(Hangman);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -260,8 +256,7 @@ public:
         readyButton->setText(QApplication::translate("Hangman", "Ready", nullptr));
         rankingLabel->setText(QApplication::translate("Hangman", "Ranking", nullptr));
         wordLabel->setText(QApplication::translate("Hangman", "WORD", nullptr));
-        testButton->setText(QApplication::translate("Hangman", "test", nullptr));
-        picLabel->setText(QApplication::translate("Hangman", "xddd", nullptr));
+        playerLabel->setText(QString());
     } // retranslateUi
 
 };
