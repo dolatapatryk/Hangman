@@ -38,7 +38,7 @@ int servFd;
 //struct gameProperties game;
 Game *game = new Game();
 
-int fdsCounter = 0;
+int fdsCounter = 1;
 
 // client sockets
 std::unordered_set<int> clientFds;
@@ -57,7 +57,7 @@ void acceptNewConnection();
 
 bool checkPlayersReady();
 
-void readMessage();
+void readMessage(int fd);
 
 void sendToAll(char *buffer, int count);
 
@@ -68,6 +68,8 @@ void sendWordToAll();
 void sendFdToPlayer(int clientFd);
 
 void sendRanking();
+
+void readPoll();
 
 int main(int argc, char ** argv){
 	game->setStarted(false);
@@ -96,9 +98,10 @@ int main(int argc, char ** argv){
 	if(res) error(1, errno, "listen failed");
 	
 	//watek przyjmujacy nowe polaczenia
-	std::thread acceptThread(acceptNewConnection);
-	std::thread readThread(readMessage);
-
+	//std::thread acceptThread(acceptNewConnection);
+	std::thread readThread(readPoll);
+	whatToWait[0].fd = servFd;
+	whatToWait[0].events = POLLIN;
 	printf("odpalono serwer\n");
 	printf("czekamy na graczy\n");
 	
@@ -189,7 +192,6 @@ void send(int fd, char * buffer, int count){
 }
 
 void acceptNewConnection() {
-	while(true) {
 		// prepare placeholders for client address
 		sockaddr_in clientAddr{0};
 		socklen_t clientAddrSize = sizeof(clientAddr);
@@ -200,9 +202,9 @@ void acceptNewConnection() {
 		
 		// add client to all clients set
 		clientFds.insert(clientFd);
-		whatToWait[playerCounter].fd = clientFd;
-		whatToWait[playerCounter].events = POLLIN;
-		playerCounter++;
+		whatToWait[fdsCounter].fd = clientFd;
+		whatToWait[fdsCounter].events = POLLIN;
+		fdsCounter++;
 
 		Player *newPlayer = new Player(clientFd);
 		game->addPlayer(newPlayer);
@@ -210,56 +212,38 @@ void acceptNewConnection() {
 		sendRanking();
 		
 		printf("new connection from: %s:%hu (fd: %d)\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), clientFd);
-	}
 }
 
-// void readMessage() {
-// 	while(true) {
-// 		int count = 0;
-// 		for(map<int, Player*>::iterator it=game->getPlayers().begin(); it!=game->getPlayers().end();++it) {
-// 				char buffer[255];
-// 				count = read(it->first, buffer, 255);
-// 				if(count < 1) {
-// 					printf("removing %d\n", it->first);
-// 					clientFds.erase(it->first);
-// 					//tu jeszcze usuwanie z wektora
-// 					close(it->first);
-// 				} else {
-// 					if(buffer[0] == PLAYER_READY) {
-// 						puts("gotowy");
-// 						it->second->setReady(true);
-// 					}		
-// 				}
-// 		}
-// 	}
-// }
-
-void readMessage() {
+void readPoll() {
 	while(true) {
-		int count = 0;
-		puts("przed pollem");
-		poll(whatToWait, MAX_PLAYERS, -1);
-		for(int i = 0; i < playerCounter; i++) {
-			puts("petla");
-			if(whatToWait[i].fd == 0) {
-				puts("fd rozne od zera");
-				if(whatToWait[i].revents & POLLIN) {
-					char buffer[255];
-					count = read(whatToWait[i].fd, buffer, 255);
-					if(count < 1) {
-						printf("removing %d\n", whatToWait[i].fd);
-						clientFds.erase(whatToWait[i].fd);
-						//tu jeszcze usuwanie z wektora
-						close(whatToWait[i].fd);
-					} else {
-						if(buffer[0] == PLAYER_READY) {
-							puts("gotowy");
-							game->getPlayers().find(whatToWait[i].fd)->second->setReady(true);
-						}		
-					}
+		poll(whatToWait, MAX_PLAYERS + 1, -1);
+		for(int i = 0; i < fdsCounter; i++) {
+			if(whatToWait[i].revents & POLLIN) {
+				if(whatToWait[i].fd == servFd) {
+					acceptNewConnection();
+				} else {
+					readMessage(whatToWait[i].fd);
 				}
 			}
 		}
+	}
+}
+
+void readMessage(int fd) {
+	char buffer[255];
+	int count = read(fd, buffer, 255);
+	if(count < 1) {
+		printf("removing %d\n", fd);
+		clientFds.erase(fd);
+		map<int, Player*>::iterator it;
+		it = game->getPlayers().find(fd);
+		game->getPlayers().erase(it);
+		close(fd);
+	} else {
+		if(buffer[0] == PLAYER_READY) {
+			puts("gotowy");
+			game->getPlayers().find(fd)->second->setReady(true);
+		}		
 	}
 }
 
