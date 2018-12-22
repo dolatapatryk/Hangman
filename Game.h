@@ -23,6 +23,7 @@ class Game {
         void encode(string s);
         void addPlayer(Player *player);
         bool checkPlayersReady();
+        string makeRanking();
         const int LIFES = 10;
         string pathToWords = "./words";
     private:

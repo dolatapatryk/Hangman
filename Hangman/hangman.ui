@@ -460,16 +460,6 @@
       <string>Ready</string>
      </property>
     </widget>
-    <widget class="QListView" name="rankingList">
-     <property name="geometry">
-      <rect>
-       <x>260</x>
-       <y>220</y>
-       <width>141</width>
-       <height>192</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QLabel" name="rankingLabel">
      <property name="geometry">
       <rect>
@@ -509,6 +499,16 @@
       <font>
        <pointsize>16</pointsize>
       </font>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="rankingTextEdit">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>230</y>
+       <width>151</width>
+       <height>181</height>
+      </rect>
      </property>
     </widget>
    </widget>

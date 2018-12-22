@@ -1,6 +1,9 @@
 #include "Game.h"
 #include <fstream>
 #include <vector>
+#include <sstream>
+#include <set>
+#include <functional>
 
 Game::Game() {
     wordLength = 0;
@@ -105,4 +108,24 @@ bool Game::checkPlayersReady() {
         return false;
     }
     return true;
+}
+
+string Game::makeRanking() {
+    typedef function<bool(pair<int, Player*>, pair<int, Player*>)> Comparator;
+
+    Comparator comparator = 
+        [](pair<int, Player*> elem1, pair<int, Player*> elem2) {
+            return elem1.second->getPoints() < elem2.second->getPoints();
+        };
+    set<pair<int, Player*>, Comparator> setOfPlayers(this->players.begin(), this->players.end(), comparator);
+
+    stringstream ss;
+    int i = 1;
+    for(pair<int, Player*> player : setOfPlayers) {
+        ss << to_string(i) << ". GRACZ " << to_string(player.first) << " - " << to_string(player.second->getPoints())
+            << " pkt\n";
+        i++;
+    }
+
+    return ss.str();
 }

@@ -7,6 +7,8 @@
 #include <QtGui>
 #include<QtWidgets>
 #include<QtNetwork>
+#include <array>
+using namespace std;
 
 namespace Ui {
 class Hangman;
@@ -26,6 +28,7 @@ protected:
     char GAME_STARTED = '1';
     char READY = '1';
     char GET_FD = '2';
+    char GET_RANKING = '3';
     int count = 0;
     void connectButtonHit();
     void socketConnected();
@@ -34,6 +37,8 @@ protected:
     void sendData(char c);
     void getWord(QByteArray dane);
     void getFd(QByteArray dane);
+    void getRanking(QByteArray dane);
+    array<int, 2> getMessageLengthAndShift(QByteArray dane);
 private:
     Ui::Hangman *ui;
     std::string picspath = "./pics/";

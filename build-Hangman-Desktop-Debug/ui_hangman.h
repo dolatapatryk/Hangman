@@ -14,7 +14,6 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
-#include <QtWidgets/QListView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
@@ -63,10 +62,10 @@ public:
     QPushButton *yButton;
     QPushButton *zButton;
     QPushButton *readyButton;
-    QListView *rankingList;
     QLabel *rankingLabel;
     QLabel *wordLabel;
     QTextEdit *wordTextEdit;
+    QTextEdit *rankingTextEdit;
     QLabel *playerLabel;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
@@ -185,9 +184,6 @@ public:
         readyButton = new QPushButton(hangmanGroup);
         readyButton->setObjectName(QString::fromUtf8("readyButton"));
         readyButton->setGeometry(QRect(20, 230, 88, 34));
-        rankingList = new QListView(hangmanGroup);
-        rankingList->setObjectName(QString::fromUtf8("rankingList"));
-        rankingList->setGeometry(QRect(260, 220, 141, 192));
         rankingLabel = new QLabel(hangmanGroup);
         rankingLabel->setObjectName(QString::fromUtf8("rankingLabel"));
         rankingLabel->setGeometry(QRect(260, 200, 58, 18));
@@ -200,6 +196,9 @@ public:
         QFont font;
         font.setPointSize(16);
         wordTextEdit->setFont(font);
+        rankingTextEdit = new QTextEdit(hangmanGroup);
+        rankingTextEdit->setObjectName(QString::fromUtf8("rankingTextEdit"));
+        rankingTextEdit->setGeometry(QRect(260, 230, 151, 181));
         playerLabel = new QLabel(centralWidget);
         playerLabel->setObjectName(QString::fromUtf8("playerLabel"));
         playerLabel->setGeometry(QRect(120, 50, 151, 21));
