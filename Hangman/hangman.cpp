@@ -195,156 +195,156 @@ array<int,2> Hangman::getMessageLengthAndShift(QByteArray dane) {
 
 void Hangman::aButtonHit() {
     QString message = "A";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::bButtonHit() {
     QString message = "B";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::cButtonHit() {
     QString message = "C";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::dButtonHit() {
     QString message = "D";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::eButtonHit() {
     QString message = "E";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::fButtonHit() {
     QString message = "F";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::gButtonHit() {
     QString message = "G";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::hButtonHit() {
     QString message = "H";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::iButtonHit() {
     QString message = "I";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::jButtonHit() {
     QString message = "J";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::kButtonHit() {
     QString message = "K";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::lButtonHit() {
     QString message = "L";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::mButtonHit() {
     QString message = "M";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::nButtonHit() {
     QString message = "N";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::oButtonHit() {
     QString message = "O";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::pButtonHit() {
     QString message = "P";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::qButtonHit() {
     QString message = "Q";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::rButtonHit() {
     QString message = "R";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::sButtonHit() {
     QString message = "S";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::tButtonHit() {
     QString message = "T";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::uButtonHit() {
     QString message = "U";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::vButtonHit() {
     QString message = "V";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::wButtonHit() {
     QString message = "W";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::xButtonHit() {
     QString message = "X";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::yButtonHit() {
     QString message = "Y";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
 
 void Hangman::zButtonHit() {
     QString message = "Z";
-    message = message + QString::number(QDateTime::currentMSecsSinceEpoch());
+    message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
 }
