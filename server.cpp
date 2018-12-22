@@ -30,7 +30,7 @@ string pathToWords = "./words";
 // server socket
 int servFd;
 //struct gameProperties game;
-Game *game1 = new Game();
+Game *game = new Game();
 
 // client sockets
 std::unordered_set<int> clientFds;
@@ -55,7 +55,7 @@ void sendToAll(char *buffer, int count);
 void send(int fd, char *buffer, int count);
 
 int main(int argc, char ** argv){
-	game1->setStarted(false);
+	game->setStarted(false);
 
 	// get and validate port number
 	if(argc != 2) error(1, 0, "Need 1 arg (port)");
@@ -89,29 +89,29 @@ int main(int argc, char ** argv){
 	printf("czekamy na graczy\n");
 	
 	while(true){
-		if(game1->getPlayers().size() < 1) {
+		if(game->getPlayers().size() < 1) {
 			//continue;
 		}
 		
-		if(game1->checkPlayersReady()) {
+		if(game->checkPlayersReady()) {
 			puts("gracze gotowi");
-			game1->setStarted(true);
+			game->setStarted(true);
 			puts("started");
-			game1->makeWord();
+			game->makeWord();
 			puts("zrobione haslo");
-			printf("haslo: %s\n", game1->getWord());
+			printf("haslo: %s\n", game->getWord());
 			char buffer[1];
 			buffer[0] = GAME_STARTED;
 			sendToAll(buffer, 1);
 			while(true) {
-				if(game1->getLifes() == 0) {
+				if(game->getLifes() == 0) {
 					puts("przegrana");
-					game1->setStarted(false);
+					game->setStarted(false);
 					//tu jeszcze ze wszyscy gracze niegotowi
 				}
-				if(game1->getWord() == game1->getEncoded()) {
+				if(game->getWord() == game->getEncoded()) {
 					puts("wygrana");
-					game1->setStarted(false);
+					game->setStarted(false);
 					//tu jeszcze ze wszyscy niegotowi
 				}
 			}
@@ -145,7 +145,7 @@ void ctrl_c(int){
 	for(int clientFd : clientFds)
 		close(clientFd);
 	close(servFd);
-	delete game1;
+	delete game;
 	printf("Closing server\n");
 	exit(0);
 }
@@ -189,7 +189,7 @@ void acceptNewConnection() {
 		clientFds.insert(clientFd);
 
 		Player *newPlayer = new Player(clientFd);
-		game1->addPlayer(newPlayer);
+		game->addPlayer(newPlayer);
 		printf("new connection from: %s:%hu (fd: %d)\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), clientFd);
 	}
 }
@@ -197,7 +197,7 @@ void acceptNewConnection() {
 void readMessage() {
 	while(true) {
 		int count = 0;
-		for(map<int, Player*>::iterator it=game1->getPlayers().begin(); it!=game1->getPlayers().end();++it) {
+		for(map<int, Player*>::iterator it=game->getPlayers().begin(); it!=game->getPlayers().end();++it) {
 			char buffer[255];
 			count = read(it->first, buffer, 255);
 			if(count < 1) {

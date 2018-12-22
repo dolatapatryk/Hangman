@@ -42,3 +42,15 @@ bool Player::isReady() {
 void Player::setReady(bool b) {
     ready = b;
 }
+
+void Player::addPoints(int points) {
+    this->points += points;
+}
+
+void Player::subtractPoints(int points) {
+    this-> points -= points;
+}
+
+void Player::loseLife() {
+    this->lifes -= 1;
+}

@@ -11,6 +11,9 @@ class Player {
         void setLifes(int n);
         bool isReady();
         void setReady(bool b);
+        void addPoints(int points);
+        void subtractPoints(int points);
+        void loseLife();
         int LIFES = 10;
     
     private:
