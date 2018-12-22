@@ -57,6 +57,8 @@ void send(int fd, char *buffer, int count);
 
 void sendWordToAll();
 
+void sendFdToPlayer(int clientFd);
+
 int main(int argc, char ** argv){
 	game->setStarted(false);
 
@@ -191,6 +193,8 @@ void acceptNewConnection() {
 
 		Player *newPlayer = new Player(clientFd);
 		game->addPlayer(newPlayer);
+		sendFdToPlayer(clientFd);
+		
 		printf("new connection from: %s:%hu (fd: %d)\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), clientFd);
 	}
 }
@@ -229,4 +233,14 @@ void sendWordToAll() {
 	}
 	printf("wiadomosc: %s\n", buffer);
 	sendToAll(buffer, length);
+}
+
+void sendFdToPlayer(int clientFd) {
+	string fdString = to_string(clientFd);
+	int length = fdString.length() + 2;
+	char buffer[length];
+	buffer[0] = '2';
+	strcat(buffer, to_string(fdString.length()).c_str());
+	strcat(buffer, fdString.c_str());
+	send(clientFd, buffer, length);
 }

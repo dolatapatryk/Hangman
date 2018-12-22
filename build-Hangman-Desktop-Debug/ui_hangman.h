@@ -67,6 +67,7 @@ public:
     QLabel *rankingLabel;
     QLabel *wordLabel;
     QTextEdit *wordTextEdit;
+    QLabel *playerLabel;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -199,6 +200,9 @@ public:
         QFont font;
         font.setPointSize(16);
         wordTextEdit->setFont(font);
+        playerLabel = new QLabel(centralWidget);
+        playerLabel->setObjectName(QString::fromUtf8("playerLabel"));
+        playerLabel->setGeometry(QRect(120, 50, 151, 21));
         Hangman->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(Hangman);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
@@ -253,6 +257,7 @@ public:
         readyButton->setText(QApplication::translate("Hangman", "Ready", nullptr));
         rankingLabel->setText(QApplication::translate("Hangman", "Ranking", nullptr));
         wordLabel->setText(QApplication::translate("Hangman", "WORD", nullptr));
+        playerLabel->setText(QString());
     } // retranslateUi
 
 };

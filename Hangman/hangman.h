@@ -25,14 +25,15 @@ protected:
     QTimer * connTimeoutTimer;
     char GAME_STARTED = '1';
     char READY = '1';
+    char GET_FD = '2';
     int count = 0;
     void connectButtonHit();
     void socketConnected();
     void readData();
     void readyButtonHit();
     void sendData(char c);
-    void testPic();
-
+    void getWord(QByteArray dane);
+    void getFd(QByteArray dane);
 private:
     Ui::Hangman *ui;
     std::string picspath = "./pics/";
