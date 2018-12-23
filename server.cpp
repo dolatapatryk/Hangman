@@ -12,14 +12,10 @@
 #include <signal.h>
 #include <string>
 #include <iostream>
-#include <vector>
 #include <map>
 #include <fstream>
 #include <cstring>
 #include <poll.h>
-#include <set>
-#include <functional>
-#include <sstream>
 #include "Game.h"
 
 using namespace std;
