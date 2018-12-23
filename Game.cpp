@@ -79,19 +79,22 @@ void Game::makeWord() {
 	srand(time(NULL));
 	string temp = lines[rand()%lines.size()];
 	this->wordLength = temp.length();
-
+    printf("game.cpp word length: %d\n", this->wordLength);
 	encode(temp);
 }
 
 void Game::encode(string s) {
-    this->word = new char[this->wordLength + 1];
-    this->encoded = new char[this->wordLength + 1];
+    delete this->word;
+    delete this->encoded;
+    this->word = new char[this->wordLength];
+    this->encoded = new char[this->wordLength];
     
     for(int i = 0; i < this->wordLength; i++) {
 		this->word[i] = s[i];
 		if(this->word[i] <= 'Z' && this->word[i] >= 'A')
 			this->encoded[i] = '_';
 	}
+    printf("game.cpp word: %s encoded: %s\n", this->word, this->encoded);
 }
 
 void Game::addPlayer(Player *player) {
@@ -126,9 +129,58 @@ string Game::makeRanking() {
     stringstream ss;
     int i = 1;
     for(pair<int, Player*> player : setOfPlayers) {
-        ss << to_string(i) << ". GRACZ " << to_string(player.first) << " - " << to_string(player.second->getPoints())
-            << " pkt\n";
+        ss << to_string(i) << ". PLAYER " << to_string(player.first) << " - " << to_string(player.second->getPoints())
+            << " p - ";
+        if(player.second->isReady())
+            ss<<"READY\n";
+        else
+            ss<<"UNREADY\n";
         i++;
     }
     return ss.str();
+}
+
+void Game::setAllPlayersUnready() {
+    for(map<int, Player*>::iterator it=this->players.begin(); it!=this->players.end(); ++it) {
+        it->second->setReady(false);
+    }
+}
+
+void Game::endGame() {
+    this->started = false;
+    setAllPlayersUnready();
+}
+
+int Game::decode(char c) {
+    int points = 0;
+    bool present = false;
+    for(int i = 0; i < this->wordLength; i++) {
+        if(this->word[i] == c) {
+            points++;
+            this->encoded[i] = c;
+            present = true;
+        }
+    }
+
+    if(!present)
+        this->lifes--;
+    printf("zycia: %d\n", this->lifes);
+    
+    return points;
+}
+
+bool Game::compareWordAndEncoded() {
+    bool theSame = true;
+    for(int i = 0; i < this->wordLength; i++) {
+        if(this->word[i] == this->encoded[i])
+            continue;
+        else
+            theSame = false;
+    }
+
+    return theSame;
+}
+
+bool Game::checkIfPlayerIsReady(int clientFd) {
+    return this->players.find(clientFd)->second->isReady();
 }

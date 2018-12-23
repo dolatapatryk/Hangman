@@ -23,7 +23,12 @@ class Game {
         void encode(string s);
         void addPlayer(Player *player);
         bool checkPlayersReady();
+        void setAllPlayersUnready();
         string makeRanking();
+        void endGame();
+        int decode(char c);
+        bool compareWordAndEncoded();
+        bool checkIfPlayerIsReady(int clientFd);
         const int LIFES = 10;
         string pathToWords = "./words";
     private:

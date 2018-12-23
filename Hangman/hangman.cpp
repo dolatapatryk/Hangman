@@ -7,7 +7,7 @@ using namespace std;
 
 Hangman::Hangman(QWidget *parent) : QMainWindow(parent), ui(new Ui::Hangman) {
     ui->setupUi(this);
-
+    addButonsToArray();
     connect(ui->connectButton, &QPushButton::clicked, this, &Hangman::connectButtonHit);
     connect(ui->hostLineEdit, &QLineEdit::returnPressed, ui->connectButton, &QPushButton::click);
     connect(ui->readyButton, &QPushButton::clicked, this, &Hangman::readyButtonHit);
@@ -75,12 +75,17 @@ void Hangman::socketConnected() {
 
 void Hangman::readData() {
     QByteArray dane = sock->read(512);
+    qDebug()<<dane;
     if(dane[0] == GAME_STARTED) {
-        getWord(dane);
+        getWordAndRanking(dane, started);
     } else if (dane[0] == GET_FD) {
         getFdAndRanking(dane);
     } else if (dane[0] == GET_RANKING) {
         getRanking(dane);
+    } else if (dane[0] == GAME_ENDED) {
+        gameEndedAndRanking(dane);
+    } else if (dane[0] >= 'A' && dane[0] <= 'Z') {
+        disableButton(dane);
     }
 }
 
@@ -116,6 +121,7 @@ void Hangman::getWord(QByteArray dane) {
     QFont font("Noto Sans", 16);
     font.setLetterSpacing(QFont::AbsoluteSpacing, 6);
     ui->wordTextEdit->setFont(font);
+    ui->readyButton->setEnabled(false);
 }
 
 void Hangman::getFd(QByteArray dane) {
@@ -127,7 +133,7 @@ void Hangman::getFd(QByteArray dane) {
     for(int i = 0; i < length; i++) {
         fd[i] = dane[i+2 + shift];
     }
-    QString playerName = "GRACZ: " + QString::fromUtf8(fd).trimmed();
+    QString playerName = "PLAYER: " + QString::fromUtf8(fd).trimmed();
     ui->playerLabel->setText(playerName);
 }
 
@@ -153,6 +159,8 @@ void Hangman::getFdAndRanking(QByteArray dane) {
     for(int i = 0; i < length; i++) {
         fd[i] = dane[i+2 + shift];
     }
+    QString playerName = "PLAYER: " + QString::fromUtf8(fd).trimmed();
+    ui->playerLabel->setText(playerName);
     int lengthFd = length + 2 + shift;
     QByteArray ranking;
     for(int i = 0; i < dane.length(); i++) {
@@ -161,7 +169,12 @@ void Hangman::getFdAndRanking(QByteArray dane) {
     getRanking(ranking);
 }
 
-void Hangman::getWordAndRanking(QByteArray dane) {
+void Hangman::getWordAndRanking(QByteArray dane, bool isStarted) {
+    if(!isStarted) {
+        started = true;
+        enableButtons();
+        ui->wordTextEdit->clear();
+    }
     array<int, 2> lengthAndShift = getMessageLengthAndShift(dane);
     int length = lengthAndShift[0];
     int shift = lengthAndShift[1];
@@ -170,12 +183,38 @@ void Hangman::getWordAndRanking(QByteArray dane) {
     for(int i = 0; i < length; i++) {
         word[i] = dane[i+2+shift];
     }
+    ui->wordTextEdit->append(QString::fromUtf8(word).trimmed());
+    ui->wordTextEdit->setAlignment(Qt::AlignCenter);
+    QFont font("Noto Sans", 16);
+    font.setLetterSpacing(QFont::AbsoluteSpacing, 6);
+    ui->wordTextEdit->setFont(font);
+    ui->readyButton->setEnabled(false);
     int lengthWord = length +2 +shift;
     QByteArray ranking;
     for(int i = 0; i < dane.length(); i++) {
         ranking[i] = dane[i + lengthWord];
     }
     getRanking(ranking);
+    ui->readyButton->setEnabled(false);
+}
+
+
+void Hangman::gameEndedAndRanking(QByteArray dane) {
+    ui->readyButton->setEnabled(true);
+    ui->wordTextEdit->clear();
+    int win = dane[1] - '0';
+    if(win == 1)
+        ui->wordTextEdit->setText("WIN");
+    else
+        ui->wordTextEdit->setText("LOSS");
+
+    QByteArray ranking;
+    for(int i = 0; i < dane.length(); i++) {
+        ranking[i] = dane[i + 2];
+    }
+    getRanking(ranking);
+    ui->lettersGroup->setEnabled(false);
+    started = false;
 }
 
 array<int,2> Hangman::getMessageLengthAndShift(QByteArray dane) {
@@ -191,6 +230,31 @@ array<int,2> Hangman::getMessageLengthAndShift(QByteArray dane) {
     lengthAndShift[0] = stoi(lengthString);
     lengthAndShift[1] = j;
     return lengthAndShift;
+}
+
+void Hangman::disableButton(QByteArray dane) {
+    if(started) {
+        int i = 0;
+        for(char x = 'A'; x <= 'Z'; x++) {
+            if(x == dane[0]) {
+                letterButtons[i]->setEnabled(false);
+                qDebug()<<"poszedl disable buttona";
+                break;
+            }
+            i++;
+        }
+        QByteArray wordAndRanking;
+        for(i = 0; i < dane.length(); i++) {
+            wordAndRanking[i] = dane[i+1];
+        }
+        getWordAndRanking(wordAndRanking, started);
+    }
+}
+
+void Hangman::enableButtons() {
+    for(int i = 0; i < 26; i++) {
+        letterButtons[i]->setEnabled(true);
+    }
 }
 
 void Hangman::aButtonHit() {
@@ -347,4 +411,33 @@ void Hangman::zButtonHit() {
     QString message = "Z";
     message = message + QString::number(QDateTime::currentMSecsSinceEpoch()) + ";";
     sendData(message);
+}
+
+void Hangman::addButonsToArray() {
+    letterButtons[0] = ui->aButton;
+    letterButtons[1] = ui->bButton;
+    letterButtons[2] = ui->cButton;
+    letterButtons[3] = ui->dButton;
+    letterButtons[4] = ui->eButton;
+    letterButtons[5] = ui->fButton;
+    letterButtons[6] = ui->gButton;
+    letterButtons[7] = ui->hButton;
+    letterButtons[8] = ui->iButton;
+    letterButtons[9] = ui->jButton;
+    letterButtons[10] = ui->kButton;
+    letterButtons[11] = ui->lButton;
+    letterButtons[12] = ui->mButton;
+    letterButtons[13] = ui->nButton;
+    letterButtons[14] = ui->oButton;
+    letterButtons[15] = ui->pButton;
+    letterButtons[16] = ui->qButton;
+    letterButtons[17] = ui->rButton;
+    letterButtons[18] = ui->sButton;
+    letterButtons[19] = ui->tButton;
+    letterButtons[20] = ui->uButton;
+    letterButtons[21] = ui->vButton;
+    letterButtons[22] = ui->wButton;
+    letterButtons[23] = ui->xButton;
+    letterButtons[24] = ui->yButton;
+    letterButtons[25] = ui->zButton;
 }
