@@ -25,11 +25,15 @@ public:
 protected:
     QTcpSocket * sock;
     QTimer * connTimeoutTimer;
+    QPushButton* letterButtons[26];
+    bool started = false;
     char GAME_STARTED = '1';
     char READY = '1';
     char GET_FD = '2';
     char GET_RANKING = '3';
+    char GAME_ENDED = '0';
     int count = 0;
+    int playerLifes = 10;
     void connectButtonHit();
     void socketConnected();
     void readData();
@@ -40,7 +44,12 @@ protected:
     void getFd(QByteArray dane);
     void getRanking(QByteArray dane);
     void getFdAndRanking(QByteArray dane);
-    void getWordAndRanking(QByteArray dane);
+    void getWordAndRanking(QByteArray dane, bool isStarted);
+    void gameEnded();
+    void gameEndedAndRanking(QByteArray dane);
+    void disableButton(QByteArray dane);
+    void enableButtons();
+    void addButonsToArray();
     void aButtonHit();
     void bButtonHit();
     void cButtonHit();

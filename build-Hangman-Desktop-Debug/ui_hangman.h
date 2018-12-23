@@ -75,7 +75,7 @@ public:
     {
         if (Hangman->objectName().isEmpty())
             Hangman->setObjectName(QString::fromUtf8("Hangman"));
-        Hangman->resize(459, 553);
+        Hangman->resize(518, 553);
         centralWidget = new QWidget(Hangman);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         connectGroup = new QGroupBox(centralWidget);
@@ -96,7 +96,7 @@ public:
         hangmanGroup = new QGroupBox(centralWidget);
         hangmanGroup->setObjectName(QString::fromUtf8("hangmanGroup"));
         hangmanGroup->setEnabled(false);
-        hangmanGroup->setGeometry(QRect(10, 70, 421, 421));
+        hangmanGroup->setGeometry(QRect(10, 70, 491, 421));
         lettersGroup = new QGroupBox(hangmanGroup);
         lettersGroup->setObjectName(QString::fromUtf8("lettersGroup"));
         lettersGroup->setEnabled(false);
@@ -198,14 +198,14 @@ public:
         wordTextEdit->setFont(font);
         rankingTextEdit = new QTextEdit(hangmanGroup);
         rankingTextEdit->setObjectName(QString::fromUtf8("rankingTextEdit"));
-        rankingTextEdit->setGeometry(QRect(260, 230, 151, 181));
+        rankingTextEdit->setGeometry(QRect(260, 230, 201, 181));
         playerLabel = new QLabel(centralWidget);
         playerLabel->setObjectName(QString::fromUtf8("playerLabel"));
         playerLabel->setGeometry(QRect(120, 50, 151, 21));
         Hangman->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(Hangman);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 459, 23));
+        menuBar->setGeometry(QRect(0, 0, 518, 23));
         Hangman->setMenuBar(menuBar);
         mainToolBar = new QToolBar(Hangman);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));

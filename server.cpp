@@ -16,6 +16,7 @@
 #include <fstream>
 #include <cstring>
 #include <poll.h>
+#include <time.h>
 #include "Game.h"
 
 using namespace std;
@@ -29,6 +30,9 @@ string SEMICOLON = ";";
 string GAME_STARTED = "1";
 string SEND_FD_TO_PLAYER = "2";
 string SEND_RANKING = "3";
+string GAME_ENDED = "0";
+string GAME_WIN = "1";
+string GAME_LOSS = "0";
 
 string pathToWords = "./words";
 
@@ -42,6 +46,8 @@ int fdsCounter = 1;
 // client sockets
 std::unordered_set<int> clientFds;
 pollfd whatToWait[MAX_PLAYERS + 1] {};
+map<char, map<int, long>> lettersSent;
+map<char, map<int, bool>> confirmationAboutDisablingLetter;
 
 // handles SIGINT
 void ctrl_c(int);
@@ -70,6 +76,26 @@ void sendRanking();
 
 void readPoll();
 
+void removePlayer(int clientFd);
+
+void setPlayerReady(int clientFd);
+
+void handleLetter(char letter, int clientFd);
+
+void getLetterSendTime(char * buffer, int clientFd);
+
+void setConfirmationAboutDisablingLetter(char letter, int clientFd);
+
+bool checkIfEachPlayerDisableButton(char letter);
+
+int checkWhoWasFirst(char letter);
+
+void sendWordAndRanking();
+
+void sendLetterWordRanking(char letter);
+
+void sendEndGameAndWinOrLoss(bool win);
+
 int main(int argc, char ** argv){
 	game->setStarted(false);
 	// get and validate port number
@@ -96,7 +122,6 @@ int main(int argc, char ** argv){
 	res = listen(servFd, 1);
 	if(res) error(1, errno, "listen failed");
 	
-	//watek przyjmujacy nowe polaczenia
 	std::thread readThread(readPoll);
 	whatToWait[0].fd = servFd;
 	whatToWait[0].events = POLLIN;
@@ -104,29 +129,31 @@ int main(int argc, char ** argv){
 	printf("czekamy na graczy\n");
 	
 	while(true){
-		if(game->getPlayers().size() < 1) {
-			//continue;
+		if(game->getPlayers().size() < 2) {
+			continue;
 		}
 		
 		if(game->checkPlayersReady()) {
 			puts("gracze gotowi");
 			game->setStarted(true);
+			lettersSent.clear();
 			puts("started");
 			game->makeWord();
 			puts("zrobione haslo");
 			printf("haslo: %s\n", game->getWord());
-			sendWordToAll();
-			sendRanking();
-			while(true) {
+			sendWordAndRanking();
+			while(game->isStarted()) {
 				if(game->getLifes() == 0) {
 					puts("przegrana");
-					game->setStarted(false);
-					//tu jeszcze ze wszyscy gracze niegotowi
+					game->endGame();
+					sendEndGameAndWinOrLoss(false);
+					break;
 				}
-				if(game->getWord() == game->getEncoded()) {
+				if(game->compareWordAndEncoded()) {
 					puts("wygrana");
-					game->setStarted(false);
-					//tu jeszcze ze wszyscy niegotowi
+					game->endGame();
+					sendEndGameAndWinOrLoss(true);
+					break;
 				}
 			}
 		} else {
@@ -231,20 +258,48 @@ void readMessage(int fd) {
 	char buffer[255];
 	int count = read(fd, buffer, 255);
 	if(count < 1) {
-		printf("removing %d\n", fd);
-		clientFds.erase(fd);
-		map<int, Player*>::iterator it;
-		it = game->getPlayers().find(fd);
-		game->getPlayers().erase(it);
-		close(fd);
+		removePlayer(fd);
 	} else {
+		printf("buffer: %s\n", buffer);
 		if(buffer[0] == PLAYER_READY) {
-			puts("gotowy");
-			game->getPlayers().find(fd)->second->setReady(true);
-		} else if (buffer[0] >= 'A' && buffer[0] <= 'Z') {
-			puts("dostalem literke");
-		}
+			setPlayerReady(fd);
+			sendRanking();
+		} else if (buffer[0] >= 'A' && buffer[0] <= 'Z' && game->isStarted()) {
+			puts("dostalem se jakas literke, jescze nie mam jej czasu\n");
+			getLetterSendTime(buffer, fd);
+			handleLetter(buffer[0], fd);
+		} 
 	}
+}
+
+void removePlayer(int clientFd) {
+	printf("removing %d\n", clientFd);
+	clientFds.erase(clientFd);
+	map<int, Player*>::iterator it;
+	it = game->getPlayers().find(clientFd);
+	game->getPlayers().erase(it);
+	close(clientFd);
+	if(game->getPlayers().size() < 2) {
+		game->setStarted(false);
+	}
+}
+
+void setPlayerReady(int clientFd) {
+	puts("gotowy\n");
+	game->getPlayers().find(clientFd)->second->setReady(true);
+}
+
+void handleLetter(char letter, int clientFd) {
+	printf("dostałem literke: %c\n", letter);
+	int points = game->decode(letter);
+	int fd = checkWhoWasFirst(letter);
+	if(points == 0) {
+		game->getPlayers().find(fd)->second->loseLife();
+	} else {
+		game->getPlayers().find(fd)->second->addPoints(points);
+	}
+	if(game->isStarted())
+		sendLetterWordRanking(letter);
 }
 
 void sendWordToAll() {
@@ -281,5 +336,124 @@ void sendRanking() {
 	strcat(buffer, to_string(ranking.length()).c_str());
 	strcat(buffer, SEMICOLON.c_str());
 	strcat(buffer, ranking.c_str());
+	sendToAll(buffer, length);
+}
+
+void sendWordAndRanking() {
+	string wordLengthString = to_string(game->getWordLength());
+	string ranking = game->makeRanking();
+	int length = game->getWordLength() + 2 + to_string(wordLengthString.length()).length();
+	length += ranking.length() + 2 + to_string(ranking.length()).length();
+	char buffer[length];
+
+	strcpy(buffer, GAME_STARTED.c_str());
+	strcat(buffer, wordLengthString.c_str());
+	strcat(buffer, SEMICOLON.c_str());
+	strcat(buffer, game->getEncoded());
+	strcat(buffer, SEND_RANKING.c_str());
+	strcat(buffer, to_string(ranking.length()).c_str());
+	strcat(buffer, SEMICOLON.c_str());
+	strcat(buffer, ranking.c_str());
+	printf("wiadomosc: %s\n", buffer);
+	sendToAll(buffer, length);
+}
+
+void sendLetterWordRanking(char letter) {
+	string wordLengthString = to_string(game->getWordLength());
+	string ranking = game->makeRanking();
+	int length = game->getWordLength() + 2 + to_string(wordLengthString.length()).length();
+	length += ranking.length() + 2 + to_string(ranking.length()).length() + 1;
+	char buffer[length];
+
+	string letterString(1,letter);
+	strcpy(buffer, letterString.c_str());
+	strcat(buffer, GAME_STARTED.c_str());
+	strcat(buffer, wordLengthString.c_str());
+	strcat(buffer, SEMICOLON.c_str());
+	strcat(buffer, game->getEncoded());
+	strcat(buffer, SEND_RANKING.c_str());
+	strcat(buffer, to_string(ranking.length()).c_str());
+	strcat(buffer, SEMICOLON.c_str());
+	strcat(buffer, ranking.c_str());
+	printf("wiadomosc: %s\n", buffer);
+	sendToAll(buffer, length);
+}
+
+void getLetterSendTime(char * buffer, int clientFd) {
+	char letter = buffer[0];
+	char *timeChar = new char[20];
+	int i = 1;
+	while(buffer[i] != ';') {
+		timeChar[i-1] = buffer[i];
+		i++;
+	}
+	map<char, map<int, long>>::iterator it = lettersSent.find(letter);
+	if(it != lettersSent.end()) {
+		it->second.insert(make_pair(clientFd, atol(timeChar)));
+	} else {
+		map<int, long> clientsWithTimes;
+		clientsWithTimes.insert(make_pair(clientFd, atol(timeChar)));
+		lettersSent.insert(make_pair(letter, clientsWithTimes));
+	}
+
+	// map<char, map<int, bool>>::iterator iter = confirmationAboutDisablingLetter.find(letter);
+	// if(iter != confirmationAboutDisablingLetter.end()) {
+	// 	iter->second.insert(make_pair(clientFd, false));
+	// } else {
+	// 	map<int, bool> clientsWithConfirmation;
+	// 	clientsWithConfirmation.insert(make_pair(clientFd, false));
+	// 	confirmationAboutDisablingLetter.insert(make_pair(letter, clientsWithConfirmation));
+	// }
+
+}
+
+void setConfirmationAboutDisablingLetter(char letter, int clientFd) {
+	puts("aktualizuje potwierdzenie literki\n");
+	confirmationAboutDisablingLetter.find(letter)->second[clientFd] = true;
+}
+
+bool checkIfEachPlayerDisableButton(char letter) {
+	while(true){
+		bool check = true;
+		map<char, map<int, bool>>::iterator it = confirmationAboutDisablingLetter.find(letter);
+		for(map<int, bool>::iterator iter=it->second.begin(); iter!=it->second.end(); ++iter) {
+			if(iter->second == false){
+				check = false;
+				break;
+			}
+		}
+		if(check == true)
+			break;
+	}
+	return true;
+}
+
+int checkWhoWasFirst(char letter) {
+	int fd = 0;
+	map<char, map<int, long>>::iterator it = lettersSent.find(letter);
+	long smallestTime = __LONG_MAX__;
+	for(map<int, long>::iterator iter=it->second.begin(); iter!=it->second.end(); ++iter) {
+		if(iter->second < smallestTime) {
+			smallestTime = iter->second;
+			fd = iter->first;
+		}
+	}
+	return fd;
+}
+
+void sendEndGameAndWinOrLoss(bool win) {
+	string ranking = game->makeRanking();
+	int length = ranking.length() + 4 + to_string(ranking.length()).length();
+	char buffer[length];
+	strcpy(buffer, GAME_ENDED.c_str());
+	if(win)
+		strcat(buffer, GAME_WIN.c_str());
+	else
+		strcat(buffer, GAME_LOSS.c_str());
+	strcat(buffer, SEND_RANKING.c_str());
+	strcat(buffer, to_string(ranking.length()).c_str());
+	strcat(buffer, SEMICOLON.c_str());
+	strcat(buffer, ranking.c_str());
+	printf("wiadomosc: %s\n", buffer);
 	sendToAll(buffer, length);
 }
