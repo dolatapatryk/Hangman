@@ -78,6 +78,7 @@ void Game::makeWord() {
 
 	srand(time(NULL));
 	string temp = lines[rand()%lines.size()];
+    cout<<"słowo z pliku: "<<temp<<flush;
 	this->wordLength = temp.length();
     printf("game.cpp word length: %d\n", this->wordLength);
 	encode(temp);
@@ -90,6 +91,7 @@ void Game::encode(string s) {
     this->encoded = new char[this->wordLength];
     
     for(int i = 0; i < this->wordLength; i++) {
+        printf("%c\n", s[i]);
 		this->word[i] = s[i];
 		if(this->word[i] <= 'Z' && this->word[i] >= 'A')
 			this->encoded[i] = '_';
