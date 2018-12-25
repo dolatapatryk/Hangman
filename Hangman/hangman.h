@@ -33,8 +33,8 @@ protected:
     char GET_RANKING = '3';
     char GAME_ENDED = '0';
     char GAME_ALREADY_STARTED = '4';
-    int count = 0;
-    int playerLifes = 9;
+    const int MAX_LIFES = 9;
+    int playerLifes;
     void connectButtonHit();
     void socketConnected();
     void readData();
@@ -52,6 +52,7 @@ protected:
     void disableButton(QByteArray dane);
     void enableButtons();
     void addButonsToArray();
+    void showPic();
     void aButtonHit();
     void bButtonHit();
     void cButtonHit();

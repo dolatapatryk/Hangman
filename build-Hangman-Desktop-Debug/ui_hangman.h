@@ -70,6 +70,7 @@ public:
     QLabel *shareLifesLabel;
     QLabel *label_2;
     QLabel *yourLifesLabel;
+    QLabel *picLabel;
     QLabel *playerLabel;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
@@ -222,6 +223,9 @@ public:
         yourLifesLabel->setGeometry(QRect(337, 110, 71, 20));
         yourLifesLabel->setFont(font1);
         yourLifesLabel->setAlignment(Qt::AlignCenter);
+        picLabel = new QLabel(hangmanGroup);
+        picLabel->setObjectName(QString::fromUtf8("picLabel"));
+        picLabel->setGeometry(QRect(20, 110, 201, 101));
         playerLabel = new QLabel(centralWidget);
         playerLabel->setObjectName(QString::fromUtf8("playerLabel"));
         playerLabel->setGeometry(QRect(120, 50, 151, 21));
@@ -283,6 +287,7 @@ public:
         shareLifesLabel->setText(QString());
         label_2->setText(QApplication::translate("Hangman", "YOUR LIFES", nullptr));
         yourLifesLabel->setText(QString());
+        picLabel->setText(QString());
         playerLabel->setText(QString());
     } // retranslateUi
 

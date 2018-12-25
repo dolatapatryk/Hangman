@@ -149,7 +149,6 @@ int main(int argc, char ** argv){
 		} else {
 			continue;
 		}
-		
 	}
 
 	puts("koniec");	

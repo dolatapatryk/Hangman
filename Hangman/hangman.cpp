@@ -115,7 +115,7 @@ void Hangman::getWord(QByteArray dane) {
     int shift = lengthAndShift[1];
     ui->lettersGroup->setEnabled(true);
     QByteArray word;
-    for(int i = 0; i < length; i++) {
+    for(int i = 0; i <= length; i++) {
         word[i] = dane[i+2+shift];
     }
     ui->wordTextEdit->append(QString::fromUtf8(word).trimmed());
@@ -132,7 +132,7 @@ void Hangman::getFd(QByteArray dane) {
     int shift = lengthAndShift[1];
 
     QByteArray fd;
-    for(int i = 0; i < length; i++) {
+    for(int i = 0; i <= length; i++) {
         fd[i] = dane[i+2 + shift];
     }
     QString playerName = "PLAYER: " + QString::fromUtf8(fd).trimmed();
@@ -150,9 +150,18 @@ void Hangman::getRanking(QByteArray dane) {
     }
     ui->rankingTextEdit->clear();
     ui->rankingTextEdit->append(QString::fromUtf8(ranking));
+
+    if(dane[length + 2 +shift] == GAME_STARTED) {
+        QByteArray word;
+        for(int i = 0; i < dane.length(); i++) {
+            word[i] = dane[i+length+2+shift];
+        }
+        getWord(word);
+    }
 }
 
 void Hangman::getFdAndRanking(QByteArray dane) {
+    playerLifes = MAX_LIFES;
     array<int, 2> lengthAndShift = getMessageLengthAndShift(dane);
     int length = lengthAndShift[0];
     int shift = lengthAndShift[1];
@@ -165,7 +174,7 @@ void Hangman::getFdAndRanking(QByteArray dane) {
     ui->playerLabel->setText(playerName);
     int lengthFd = length + 2 + shift;
     QByteArray ranking;
-    for(int i = 0; i < dane.length(); i++) {
+    for(int i = 0; i <= dane.length(); i++) {
         ranking[i] = dane[i + lengthFd];
     }
     getRanking(ranking);
@@ -176,7 +185,10 @@ void Hangman::getWordAndRanking(QByteArray dane, bool isStarted) {
         started = true;
         enableButtons();
         ui->wordTextEdit->clear();
-        ui->shareLifesLabel->setText(QString::number(playerLifes));
+        ui->shareLifesLabel->setText(QString::number(MAX_LIFES));
+        showPic();
+        if(playerLifes == 0)
+            playerLifes = MAX_LIFES;
         ui->yourLifesLabel->setText(QString::number(playerLifes));
     }
     array<int, 2> lengthAndShift = getMessageLengthAndShift(dane);
@@ -195,7 +207,7 @@ void Hangman::getWordAndRanking(QByteArray dane, bool isStarted) {
     ui->readyButton->setEnabled(false);
     int lengthWord = length +2 +shift;
     QByteArray ranking;
-    for(int i = 0; i < dane.length(); i++) {
+    for(int i = 0; i <= dane.length(); i++) {
         ranking[i] = dane[i + lengthWord];
     }
     getRanking(ranking);
@@ -212,10 +224,11 @@ void Hangman::gameEndedAndRanking(QByteArray dane) {
     else {
         ui->wordTextEdit->setText("LOSS");
         ui->shareLifesLabel->setText("0");
+        showPic();
     }
 
     QByteArray ranking;
-    for(int i = 0; i < dane.length(); i++) {
+    for(int i = 0; i <= dane.length(); i++) {
         ranking[i] = dane[i + 2];
     }
     getRanking(ranking);
@@ -228,7 +241,7 @@ void Hangman::gameAlreadyStarted(QByteArray dane) {
     ui->readyButton->setEnabled(false);
     ui->wordTextEdit->setText("GAME ALREADY STARTED");
     QByteArray fd;
-    for(int i = 0; i < dane.length(); i++) {
+    for(int i = 0; i <= dane.length(); i++) {
         fd[i] = dane[i+1];
     }
     getFdAndRanking(fd);
@@ -262,16 +275,30 @@ void Hangman::disableButton(QByteArray dane) {
         }
         int shareLifes = dane[1] - '0';
         int yourLifes = dane[2] - '0';
-        if(yourLifes == 0) {
+        playerLifes = yourLifes;
+        if(playerLifes == 0) {
             ui->hangmanGroup->setEnabled(false);
         }
         ui->shareLifesLabel->setText(QString::number(shareLifes));
-        ui->yourLifesLabel->setText(QString::number(yourLifes));
+        ui->yourLifesLabel->setText(QString::number(playerLifes));
+        showPic();
         QByteArray wordAndRanking;
-        for(i = 0; i < dane.length(); i++) {
+        for(i = 0; i <= dane.length(); i++) {
             wordAndRanking[i] = dane[i+1 + 2];
         }
         getWordAndRanking(wordAndRanking, started);
+    }
+}
+
+void Hangman::showPic() {
+    int pictureNumber = MAX_LIFES - ui->shareLifesLabel->text().toInt();
+    QString filename = QString::fromStdString("./pictures/" + to_string(pictureNumber) + ".png");
+    ui->picLabel->setAlignment(Qt::AlignCenter);
+    QPixmap pix;
+
+    if(pix.load(filename)) {
+        pix = pix.scaled(ui->picLabel->size(), Qt::KeepAspectRatio);
+        ui->picLabel->setPixmap(pix);
     }
 }
 
