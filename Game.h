@@ -22,6 +22,7 @@ class Game {
         void makeWord();
         void prepareWordForPlayer(string s);
         void addPlayer(Player *player);
+        void removePlayer(int clientFd);
         bool checkPlayersReady();
         void setPlayerReady(int clientFd);
         void setAllPlayersUnready();

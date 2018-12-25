@@ -271,10 +271,9 @@ void readMessage(int fd) {
 void removePlayer(int clientFd) {
 	printf("removing %d\n", clientFd);
 	clientFds.erase(clientFd);
-	map<int, Player*>::iterator it;
-	it = game->getPlayers().find(clientFd);
-	game->getPlayers().erase(it);
 	close(clientFd);
+	game->removePlayer(clientFd);
+	sendRanking();
 	// if(game->getPlayers().size() < 2) {
 	// 	game->setStarted(false);
 	// }

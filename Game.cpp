@@ -96,6 +96,7 @@ void Game::prepareWordForPlayer(string s) {
 
 void Game::addPlayer(Player *player) {
     this->players.insert(make_pair(player->getFd(), player));
+    cout<<"liczba graczy: "<<this->players.size()<<endl<<flush;
 }
 
 bool Game::checkPlayersReady() {
@@ -181,4 +182,11 @@ bool Game::checkIfPlayerIsReady(int clientFd) {
 
 void Game::setPlayerReady(int clientFd) {
     this->players.find(clientFd)->second->setReady(true);
+}
+
+void Game::removePlayer(int clientFd) {
+    map<int, Player*>::iterator it;
+	it = this->players.find(clientFd);
+	this->players.erase(it);
+    cout<<"liczba graczy: "<<this->players.size()<<endl<<flush;
 }
