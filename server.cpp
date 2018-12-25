@@ -21,7 +21,8 @@
 
 using namespace std;
 
-#define BUFFOR_LENGTH 50
+//#define BUFFOR_LENGTH 50
+#define POINTS_TO_SUBTRACT_WHEN_LOSE_ALL_LIFES 5
 #define LIFES 10
 #define MAX_PLAYERS 16
 
@@ -89,7 +90,7 @@ int checkWhoWasFirst(char letter);
 
 void sendWordAndRanking();
 
-void sendLetterWordRanking(char letter);
+void sendLetterWordRanking(char letter, int clientFd);
 
 void sendEndGameAndWinOrLoss(bool win);
 
@@ -136,12 +137,8 @@ int main(int argc, char ** argv){
 		
 		if(game->checkPlayersReady()) {
 			puts("gracze gotowi");
-			game->setStarted(true);
-			game->setLifes(10);
 			lettersSent.clear();
-			puts("started");
-			game->makeWord();
-			puts("zrobione haslo");
+			game->newGame();
 			cout<<"haslo: "<<game->getWord()<<endl<<flush;
 			sendWordAndRanking();
 			while(game->isStarted()) {
@@ -283,13 +280,20 @@ void handleLetter(char letter, int clientFd) {
 	printf("dostałem literke: %c\n", letter);
 	int points = game->calculatePoints(letter);
 	int fd = checkWhoWasFirst(letter);
+	Player *player = game->getPlayers().find(fd)->second;
 	if(points == 0) {
-		game->getPlayers().find(fd)->second->loseLife();
+		player->loseLife();
+		if(player->getLifes() == 0)
+			player->subtractPoints(POINTS_TO_SUBTRACT_WHEN_LOSE_ALL_LIFES);
 	} else {
-		game->getPlayers().find(fd)->second->addPoints(points);
+		player->addPoints(points);
 	}
-	if(!checkIfGameEnded())
-		sendLetterWordRanking(letter);
+	if(!checkIfGameEnded()) {
+		for(int fileDesc : clientFds) {
+			sendLetterWordRanking(letter, fileDesc);
+		}
+	}
+		
 }
 
 void sendFdToPlayer(int clientFd) {
@@ -333,15 +337,17 @@ void sendWordAndRanking() {
 	sendToAll(buffer, length);
 }
 
-void sendLetterWordRanking(char letter) {
+void sendLetterWordRanking(char letter, int clientFd) {
 	string wordLengthString = to_string(game->getWordLength());
 	string ranking = game->makeRanking();
 	int length = game->getWordLength() + 2 + to_string(wordLengthString.length()).length();
-	length += ranking.length() + 2 + to_string(ranking.length()).length() + 1;
+	length += ranking.length() + 2 + to_string(ranking.length()).length() + 1 + 2;
 	char buffer[length];
 
 	string letterString(1,letter);
 	strcpy(buffer, letterString.c_str());
+	strcat(buffer, to_string(game->getLifes()).c_str());
+	strcat(buffer, to_string(game->getPlayers().find(clientFd)->second->getLifes()).c_str());
 	strcat(buffer, GAME_STARTED.c_str());
 	strcat(buffer, wordLengthString.c_str());
 	strcat(buffer, SEMICOLON.c_str());
@@ -351,7 +357,7 @@ void sendLetterWordRanking(char letter) {
 	strcat(buffer, SEMICOLON.c_str());
 	strcat(buffer, ranking.c_str());
 	printf("wiadomosc: %s\n", buffer);
-	sendToAll(buffer, length);
+	send(clientFd, buffer, length);
 }
 
 void getLetterSendTime(char * buffer, int clientFd) {

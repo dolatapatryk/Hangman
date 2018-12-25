@@ -190,3 +190,16 @@ void Game::removePlayer(int clientFd) {
 	this->players.erase(it);
     cout<<"liczba graczy: "<<this->players.size()<<endl<<flush;
 }
+
+void Game::setPlayersLifes() {
+    for(map<int, Player*>::iterator it=this->players.begin(); it!=this->players.end(); ++it) {
+        it->second->setLifes(LIFES);
+    }
+}
+
+void Game::newGame() {
+    this->started = true;
+    this->lifes = LIFES;
+    //setPlayersLifes();
+    makeWord();
+}

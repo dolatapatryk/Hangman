@@ -176,6 +176,8 @@ void Hangman::getWordAndRanking(QByteArray dane, bool isStarted) {
         started = true;
         enableButtons();
         ui->wordTextEdit->clear();
+        ui->shareLifesLabel->setText(QString::number(playerLifes));
+        ui->yourLifesLabel->setText(QString::number(playerLifes));
     }
     array<int, 2> lengthAndShift = getMessageLengthAndShift(dane);
     int length = lengthAndShift[0];
@@ -207,14 +209,17 @@ void Hangman::gameEndedAndRanking(QByteArray dane) {
     int win = dane[1] - '0';
     if(win == 1)
         ui->wordTextEdit->setText("WIN");
-    else
+    else {
         ui->wordTextEdit->setText("LOSS");
+        ui->shareLifesLabel->setText("0");
+    }
 
     QByteArray ranking;
     for(int i = 0; i < dane.length(); i++) {
         ranking[i] = dane[i + 2];
     }
     getRanking(ranking);
+    ui->hangmanGroup->setEnabled(true);
     ui->lettersGroup->setEnabled(false);
     started = false;
 }
@@ -255,9 +260,16 @@ void Hangman::disableButton(QByteArray dane) {
             }
             i++;
         }
+        int shareLifes = dane[1] - '0';
+        int yourLifes = dane[2] - '0';
+        if(yourLifes == 0) {
+            ui->hangmanGroup->setEnabled(false);
+        }
+        ui->shareLifesLabel->setText(QString::number(shareLifes));
+        ui->yourLifesLabel->setText(QString::number(yourLifes));
         QByteArray wordAndRanking;
         for(i = 0; i < dane.length(); i++) {
-            wordAndRanking[i] = dane[i+1];
+            wordAndRanking[i] = dane[i+1 + 2];
         }
         getWordAndRanking(wordAndRanking, started);
     }

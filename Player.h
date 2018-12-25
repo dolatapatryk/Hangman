@@ -14,7 +14,7 @@ class Player {
         void addPoints(int points);
         void subtractPoints(int points);
         void loseLife();
-        int LIFES = 10;
+        int LIFES = 9;
     
     private:
         int fd;

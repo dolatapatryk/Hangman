@@ -34,7 +34,7 @@ protected:
     char GAME_ENDED = '0';
     char GAME_ALREADY_STARTED = '4';
     int count = 0;
-    int playerLifes = 10;
+    int playerLifes = 9;
     void connectButtonHit();
     void socketConnected();
     void readData();

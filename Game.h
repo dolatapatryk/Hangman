@@ -31,7 +31,9 @@ class Game {
         int calculatePoints(char c);
         bool compareWordAndWordForPlayer();
         bool checkIfPlayerIsReady(int clientFd);
-        const int LIFES = 10;
+        void setPlayersLifes();
+        void newGame();
+        const int LIFES = 9;
         string pathToWords = "./words";
     private:
         string word;
