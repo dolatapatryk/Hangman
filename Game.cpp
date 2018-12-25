@@ -27,12 +27,12 @@ void Game::setWord(string s) {
     this->word = s;
 }
 
-string Game::getEncoded() {
-    return this->encoded;
+string Game::getWordForPlayer() {
+    return this->wordForPlayer;
 }
 
-void Game::setEncoded(string s) {
-    this->encoded = s;
+void Game::setWordForPlayer(string s) {
+    this->wordForPlayer = s;
 }
 
 int Game::getWordLength() {
@@ -79,19 +79,19 @@ void Game::makeWord() {
     cout<<"słowo z pliku: "<<temp<<flush;
 	this->wordLength = temp.length();
     printf("game.cpp word length: %d\n", this->wordLength);
-	encode(temp);
+	prepareWordForPlayer(temp);
 }
 
-void Game::encode(string s) {
+void Game::prepareWordForPlayer(string s) {
     this->word = s;
-    this->encoded = s;
+    this->wordForPlayer = s;
     for(int i = 0; i < this->wordLength; i++) {
         printf("%c\n", s[i]);
 		this->word[i] = s[i];
 		if(this->word[i] <= 'Z' && this->word[i] >= 'A')
-			this->encoded[i] = '_';
+			this->wordForPlayer[i] = '_';
 	}
-    cout<<"game.cpp word: "<<this->word<<" encoded: "<<this->encoded<<endl<<flush;
+    cout<<"game.cpp word: "<<this->word<<" encoded: "<<this->wordForPlayer<<endl<<flush;
 }
 
 void Game::addPlayer(Player *player) {
@@ -156,7 +156,7 @@ int Game::calculatePoints(char c) {
     for(int i = 0; i < this->wordLength; i++) {
         if(this->word[i] == c) {
             points++;
-            this->encoded[i] = c;
+            this->wordForPlayer[i] = c;
             present = true;
         }
     }
@@ -168,16 +168,11 @@ int Game::calculatePoints(char c) {
     return points;
 }
 
-bool Game::compareWordAndEncoded() {
-    bool theSame = true;
-    for(int i = 0; i < this->wordLength; i++) {
-        if(this->word[i] == this->encoded[i])
-            continue;
-        else
-            theSame = false;
-    }
-
-    return theSame;
+bool Game::compareWordAndWordForPlayer() {
+    if((this->word.compare(this->wordForPlayer)) == 0)
+        return true;
+    else
+        return false;
 }
 
 bool Game::checkIfPlayerIsReady(int clientFd) {

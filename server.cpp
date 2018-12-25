@@ -325,7 +325,7 @@ void sendWordAndRanking() {
 	strcpy(buffer, GAME_STARTED.c_str());
 	strcat(buffer, wordLengthString.c_str());
 	strcat(buffer, SEMICOLON.c_str());
-	strcat(buffer, game->getEncoded().c_str());
+	strcat(buffer, game->getWordForPlayer().c_str());
 	strcat(buffer, SEND_RANKING.c_str());
 	strcat(buffer, to_string(ranking.length()).c_str());
 	strcat(buffer, SEMICOLON.c_str());
@@ -346,7 +346,7 @@ void sendLetterWordRanking(char letter) {
 	strcat(buffer, GAME_STARTED.c_str());
 	strcat(buffer, wordLengthString.c_str());
 	strcat(buffer, SEMICOLON.c_str());
-	strcat(buffer, game->getEncoded().c_str());
+	strcat(buffer, game->getWordForPlayer().c_str());
 	strcat(buffer, SEND_RANKING.c_str());
 	strcat(buffer, to_string(ranking.length()).c_str());
 	strcat(buffer, SEMICOLON.c_str());
@@ -441,7 +441,7 @@ bool checkIfGameEnded() {
 		sendEndGameAndWinOrLoss(false);
 		return true;
 	}
-	if(game->compareWordAndEncoded()) {
+	if(game->compareWordAndWordForPlayer()) {
 		game->endGame();
 		puts("wygrana");
 		sendEndGameAndWinOrLoss(true);
