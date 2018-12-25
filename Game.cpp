@@ -13,28 +13,26 @@ Game::Game() {
 }
 
 Game::~Game() {
-    delete this->word;
-    delete this->encoded;
     for(map<int, Player*>::iterator it=this->players.begin(); it!=this->players.end(); ++it) {
         delete it->second;
     }
     this->players.clear();
 }
 
-char* Game::getWord() {
+string Game::getWord() {
     return this->word;
 }
 
-void Game::setWord(char* c) {
-    this->word = c;
+void Game::setWord(string s) {
+    this->word = s;
 }
 
-char* Game::getEncoded() {
-    return this->encoded;
+string Game::getWordForPlayer() {
+    return this->wordForPlayer;
 }
 
-void Game::setEncoded(char* c) {
-    this->encoded = c;
+void Game::setWordForPlayer(string s) {
+    this->wordForPlayer = s;
 }
 
 int Game::getWordLength() {
@@ -78,27 +76,27 @@ void Game::makeWord() {
 
 	srand(time(NULL));
 	string temp = lines[rand()%lines.size()];
+    cout<<"słowo z pliku: "<<temp<<flush;
 	this->wordLength = temp.length();
     printf("game.cpp word length: %d\n", this->wordLength);
-	encode(temp);
+	prepareWordForPlayer(temp);
 }
 
-void Game::encode(string s) {
-    delete this->word;
-    delete this->encoded;
-    this->word = new char[this->wordLength];
-    this->encoded = new char[this->wordLength];
-    
+void Game::prepareWordForPlayer(string s) {
+    this->word = s;
+    this->wordForPlayer = s;
     for(int i = 0; i < this->wordLength; i++) {
+        printf("%c\n", s[i]);
 		this->word[i] = s[i];
 		if(this->word[i] <= 'Z' && this->word[i] >= 'A')
-			this->encoded[i] = '_';
+			this->wordForPlayer[i] = '_';
 	}
-    printf("game.cpp word: %s encoded: %s\n", this->word, this->encoded);
+    cout<<"game.cpp word: "<<this->word<<" encoded: "<<this->wordForPlayer<<endl<<flush;
 }
 
 void Game::addPlayer(Player *player) {
     this->players.insert(make_pair(player->getFd(), player));
+    cout<<"liczba graczy: "<<this->players.size()<<endl<<flush;
 }
 
 bool Game::checkPlayersReady() {
@@ -148,16 +146,18 @@ void Game::setAllPlayersUnready() {
 
 void Game::endGame() {
     this->started = false;
+    this->lifes = LIFES;
+    this->wordLength = 0;
     setAllPlayersUnready();
 }
 
-int Game::decode(char c) {
+int Game::calculatePoints(char c) {
     int points = 0;
     bool present = false;
     for(int i = 0; i < this->wordLength; i++) {
         if(this->word[i] == c) {
             points++;
-            this->encoded[i] = c;
+            this->wordForPlayer[i] = c;
             present = true;
         }
     }
@@ -169,18 +169,38 @@ int Game::decode(char c) {
     return points;
 }
 
-bool Game::compareWordAndEncoded() {
-    bool theSame = true;
-    for(int i = 0; i < this->wordLength; i++) {
-        if(this->word[i] == this->encoded[i])
-            continue;
-        else
-            theSame = false;
-    }
-
-    return theSame;
+bool Game::compareWordAndWordForPlayer() {
+    if((this->word.compare(this->wordForPlayer)) == 0)
+        return true;
+    else
+        return false;
 }
 
 bool Game::checkIfPlayerIsReady(int clientFd) {
     return this->players.find(clientFd)->second->isReady();
+}
+
+void Game::setPlayerReady(int clientFd) {
+    this->players.find(clientFd)->second->setReady(true);
+}
+
+void Game::removePlayer(int clientFd) {
+    map<int, Player*>::iterator it;
+	it = this->players.find(clientFd);
+	this->players.erase(it);
+    cout<<"liczba graczy: "<<this->players.size()<<endl<<flush;
+}
+
+void Game::setPlayersLifes() {
+    for(map<int, Player*>::iterator it=this->players.begin(); it!=this->players.end(); ++it) {
+        if(it->second->getLifes() == 0)
+            it->second->setLifes(LIFES);
+    }
+}
+
+void Game::newGame() {
+    this->started = true;
+    this->lifes = LIFES;
+    setPlayersLifes();
+    makeWord();
 }

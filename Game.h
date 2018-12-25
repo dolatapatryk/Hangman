@@ -8,10 +8,10 @@ class Game {
     public:
         Game();
         ~Game();
-        char* getWord();
-        void setWord(char* c);
-        char* getEncoded();
-        void setEncoded(char* c);
+        string getWord();
+        void setWord(string s);
+        string getWordForPlayer();
+        void setWordForPlayer(string s);
         int getWordLength();
         void setWordLength(int n);
         int getLifes();
@@ -20,20 +20,24 @@ class Game {
         void setStarted(bool b);
         map<int, Player*> getPlayers();
         void makeWord();
-        void encode(string s);
+        void prepareWordForPlayer(string s);
         void addPlayer(Player *player);
+        void removePlayer(int clientFd);
         bool checkPlayersReady();
+        void setPlayerReady(int clientFd);
         void setAllPlayersUnready();
         string makeRanking();
         void endGame();
-        int decode(char c);
-        bool compareWordAndEncoded();
+        int calculatePoints(char c);
+        bool compareWordAndWordForPlayer();
         bool checkIfPlayerIsReady(int clientFd);
-        const int LIFES = 10;
+        void setPlayersLifes();
+        void newGame();
+        const int LIFES = 9;
         string pathToWords = "./words";
     private:
-        char* word;
-	    char* encoded;
+        string word;
+	    string wordForPlayer;
 	    int wordLength;
 	    int lifes;
 	    bool started;

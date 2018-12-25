@@ -66,6 +66,11 @@ public:
     QLabel *wordLabel;
     QTextEdit *wordTextEdit;
     QTextEdit *rankingTextEdit;
+    QLabel *label;
+    QLabel *shareLifesLabel;
+    QLabel *label_2;
+    QLabel *yourLifesLabel;
+    QLabel *picLabel;
     QLabel *playerLabel;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
@@ -199,6 +204,28 @@ public:
         rankingTextEdit = new QTextEdit(hangmanGroup);
         rankingTextEdit->setObjectName(QString::fromUtf8("rankingTextEdit"));
         rankingTextEdit->setGeometry(QRect(260, 230, 201, 181));
+        label = new QLabel(hangmanGroup);
+        label->setObjectName(QString::fromUtf8("label"));
+        label->setGeometry(QRect(340, 40, 81, 18));
+        shareLifesLabel = new QLabel(hangmanGroup);
+        shareLifesLabel->setObjectName(QString::fromUtf8("shareLifesLabel"));
+        shareLifesLabel->setGeometry(QRect(340, 60, 71, 18));
+        QFont font1;
+        font1.setBold(true);
+        font1.setWeight(75);
+        shareLifesLabel->setFont(font1);
+        shareLifesLabel->setAlignment(Qt::AlignCenter);
+        label_2 = new QLabel(hangmanGroup);
+        label_2->setObjectName(QString::fromUtf8("label_2"));
+        label_2->setGeometry(QRect(340, 90, 71, 20));
+        yourLifesLabel = new QLabel(hangmanGroup);
+        yourLifesLabel->setObjectName(QString::fromUtf8("yourLifesLabel"));
+        yourLifesLabel->setGeometry(QRect(337, 110, 71, 20));
+        yourLifesLabel->setFont(font1);
+        yourLifesLabel->setAlignment(Qt::AlignCenter);
+        picLabel = new QLabel(hangmanGroup);
+        picLabel->setObjectName(QString::fromUtf8("picLabel"));
+        picLabel->setGeometry(QRect(20, 110, 201, 101));
         playerLabel = new QLabel(centralWidget);
         playerLabel->setObjectName(QString::fromUtf8("playerLabel"));
         playerLabel->setGeometry(QRect(120, 50, 151, 21));
@@ -256,6 +283,11 @@ public:
         readyButton->setText(QApplication::translate("Hangman", "Ready", nullptr));
         rankingLabel->setText(QApplication::translate("Hangman", "Ranking", nullptr));
         wordLabel->setText(QApplication::translate("Hangman", "WORD", nullptr));
+        label->setText(QApplication::translate("Hangman", "SHARE LIFES", nullptr));
+        shareLifesLabel->setText(QString());
+        label_2->setText(QApplication::translate("Hangman", "YOUR LIFES", nullptr));
+        yourLifesLabel->setText(QString());
+        picLabel->setText(QString());
         playerLabel->setText(QString());
     } // retranslateUi
 
