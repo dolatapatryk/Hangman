@@ -32,6 +32,7 @@ protected:
     char GET_FD = '2';
     char GET_RANKING = '3';
     char GAME_ENDED = '0';
+    char GAME_ALREADY_STARTED = '4';
     int count = 0;
     int playerLifes = 10;
     void connectButtonHit();
@@ -47,6 +48,7 @@ protected:
     void getWordAndRanking(QByteArray dane, bool isStarted);
     void gameEnded();
     void gameEndedAndRanking(QByteArray dane);
+    void gameAlreadyStarted(QByteArray dane);
     void disableButton(QByteArray dane);
     void enableButtons();
     void addButonsToArray();

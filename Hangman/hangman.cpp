@@ -86,6 +86,8 @@ void Hangman::readData() {
         gameEndedAndRanking(dane);
     } else if (dane[0] >= 'A' && dane[0] <= 'Z') {
         disableButton(dane);
+    } else if (dane[0] == GAME_ALREADY_STARTED) {
+        gameAlreadyStarted(dane);
     }
 }
 
@@ -215,6 +217,16 @@ void Hangman::gameEndedAndRanking(QByteArray dane) {
     getRanking(ranking);
     ui->lettersGroup->setEnabled(false);
     started = false;
+}
+
+void Hangman::gameAlreadyStarted(QByteArray dane) {
+    ui->readyButton->setEnabled(false);
+    ui->wordTextEdit->setText("GAME ALREADY STARTED");
+    QByteArray fd;
+    for(int i = 0; i < dane.length(); i++) {
+        fd[i] = dane[i+1];
+    }
+    getFdAndRanking(fd);
 }
 
 array<int,2> Hangman::getMessageLengthAndShift(QByteArray dane) {

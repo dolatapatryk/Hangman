@@ -33,6 +33,7 @@ string SEND_RANKING = "3";
 string GAME_ENDED = "0";
 string GAME_WIN = "1";
 string GAME_LOSS = "0";
+string GAME_ALREADY_STARTED = "4";
 
 string pathToWords = "./words";
 
@@ -76,8 +77,6 @@ void readPoll();
 
 void removePlayer(int clientFd);
 
-void setPlayerReady(int clientFd);
-
 void handleLetter(char letter, int clientFd);
 
 void getLetterSendTime(char * buffer, int clientFd);
@@ -95,6 +94,8 @@ void sendLetterWordRanking(char letter);
 void sendEndGameAndWinOrLoss(bool win);
 
 bool checkIfGameEnded();
+
+void sendThatGameIsAlreadyStarted(int clientFd);
 
 int main(int argc, char ** argv){
 	game->setStarted(false);
@@ -124,7 +125,6 @@ int main(int argc, char ** argv){
 	
 	whatToWait[0].fd = servFd;
 	whatToWait[0].events = POLLIN;
-	//std::thread readThread(readPoll);
 	printf("odpalono serwer\n");
 	printf("czekamy na graczy\n");
 	
@@ -137,11 +137,12 @@ int main(int argc, char ** argv){
 		if(game->checkPlayersReady()) {
 			puts("gracze gotowi");
 			game->setStarted(true);
+			game->setLifes(10);
 			lettersSent.clear();
 			puts("started");
 			game->makeWord();
 			puts("zrobione haslo");
-			printf("haslo: %s\n", game->getWord());
+			cout<<"haslo: "<<game->getWord()<<endl<<flush;
 			sendWordAndRanking();
 			while(game->isStarted()) {
 				readPoll();
@@ -225,41 +226,42 @@ void acceptNewConnection() {
 
 		Player *newPlayer = new Player(clientFd);
 		game->addPlayer(newPlayer);
-		sendFdToPlayer(clientFd);
-		if(!game->isStarted())
+		if(!game->isStarted()) {
+			sendFdToPlayer(clientFd);
 			sendRanking();
+		}
+		else {
+			sendThatGameIsAlreadyStarted(clientFd);
+		}
 		
 		printf("new connection from: %s:%hu (fd: %d)\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port), clientFd);
 }
 
 void readPoll() {
-	//while(true) {
-		poll(whatToWait, MAX_PLAYERS + 1, -1);
-		for(int i = 0; i < fdsCounter; i++) {
-			if(whatToWait[i].revents & POLLIN) {
-				if(whatToWait[i].fd == servFd) {
-					acceptNewConnection();
-				} else {
-					readMessage(whatToWait[i].fd);
-				}
+	poll(whatToWait, MAX_PLAYERS + 1, -1);
+	for(int i = 0; i < fdsCounter; i++) {
+		if(whatToWait[i].revents & POLLIN) {
+			if(whatToWait[i].fd == servFd) {
+				acceptNewConnection();
+			} else {
+				readMessage(whatToWait[i].fd);
 			}
 		}
-	//}
+	}
 }
 
 void readMessage(int fd) {
-	char buffer[255];
-	int count = read(fd, buffer, 255);
+	char buffer[30];
+	int count = read(fd, buffer, 30);
 	if(count < 1) {
 		removePlayer(fd);
 	} else {
 		printf("buffer: %s\n", buffer);
 		if(buffer[0] == PLAYER_READY) {
-			setPlayerReady(fd);
+			game->setPlayerReady(fd);
 			if(!game->isStarted())
 				sendRanking();
 		} else if (buffer[0] >= 'A' && buffer[0] <= 'Z' && game->isStarted()) {
-			puts("dostalem se jakas literke, jescze nie mam jej czasu\n");
 			getLetterSendTime(buffer, fd);
 			handleLetter(buffer[0], fd);
 		} 
@@ -273,19 +275,14 @@ void removePlayer(int clientFd) {
 	it = game->getPlayers().find(clientFd);
 	game->getPlayers().erase(it);
 	close(clientFd);
-	if(game->getPlayers().size() < 2) {
-		game->setStarted(false);
-	}
-}
-
-void setPlayerReady(int clientFd) {
-	puts("gotowy\n");
-	game->getPlayers().find(clientFd)->second->setReady(true);
+	// if(game->getPlayers().size() < 2) {
+	// 	game->setStarted(false);
+	// }
 }
 
 void handleLetter(char letter, int clientFd) {
 	printf("dostałem literke: %c\n", letter);
-	int points = game->decode(letter);
+	int points = game->calculatePoints(letter);
 	int fd = checkWhoWasFirst(letter);
 	if(points == 0) {
 		game->getPlayers().find(fd)->second->loseLife();
@@ -328,7 +325,7 @@ void sendWordAndRanking() {
 	strcpy(buffer, GAME_STARTED.c_str());
 	strcat(buffer, wordLengthString.c_str());
 	strcat(buffer, SEMICOLON.c_str());
-	strcat(buffer, game->getEncoded());
+	strcat(buffer, game->getEncoded().c_str());
 	strcat(buffer, SEND_RANKING.c_str());
 	strcat(buffer, to_string(ranking.length()).c_str());
 	strcat(buffer, SEMICOLON.c_str());
@@ -349,7 +346,7 @@ void sendLetterWordRanking(char letter) {
 	strcat(buffer, GAME_STARTED.c_str());
 	strcat(buffer, wordLengthString.c_str());
 	strcat(buffer, SEMICOLON.c_str());
-	strcat(buffer, game->getEncoded());
+	strcat(buffer, game->getEncoded().c_str());
 	strcat(buffer, SEND_RANKING.c_str());
 	strcat(buffer, to_string(ranking.length()).c_str());
 	strcat(buffer, SEMICOLON.c_str());
@@ -451,4 +448,22 @@ bool checkIfGameEnded() {
 		return true;
 	}
 	return false;
+}
+
+void sendThatGameIsAlreadyStarted(int clientFd) {
+	string fdString = to_string(clientFd);
+	string ranking = game->makeRanking();
+	int length = fdString.length() + 2 + to_string(fdString.length()).length() + 1;
+	length = ranking.length() + 2 + to_string(ranking.length()).length();
+	char buffer[length];
+	strcpy(buffer, GAME_ALREADY_STARTED.c_str());
+	strcat(buffer, SEND_FD_TO_PLAYER.c_str());
+	strcat(buffer, to_string(fdString.length()).c_str());
+	strcat(buffer, SEMICOLON.c_str());
+	strcat(buffer, fdString.c_str());
+	strcat(buffer, SEND_RANKING.c_str());
+	strcat(buffer, to_string(ranking.length()).c_str());
+	strcat(buffer, SEMICOLON.c_str());
+	strcat(buffer, ranking.c_str());
+	send(clientFd, buffer, length);
 }
