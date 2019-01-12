@@ -376,6 +376,8 @@ void getLetterSendTime(char * buffer, int clientFd) {
 		lettersSent.insert(make_pair(letter, clientsWithTimes));
 	}
 
+	delete timeChar;
+
 	// map<char, map<int, bool>>::iterator iter = confirmationAboutDisablingLetter.find(letter);
 	// if(iter != confirmationAboutDisablingLetter.end()) {
 	// 	iter->second.insert(make_pair(clientFd, false));
