@@ -187,6 +187,7 @@ void Game::setPlayerReady(int clientFd) {
 void Game::removePlayer(int clientFd) {
     map<int, Player*>::iterator it;
 	it = this->players.find(clientFd);
+    delete it->second;
 	this->players.erase(it);
     cout<<"liczba graczy: "<<this->players.size()<<endl<<flush;
 }

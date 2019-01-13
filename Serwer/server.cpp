@@ -181,9 +181,9 @@ void ctrl_c(int){
 }
 
 void sendToAll(char * buffer, int count){
-	int res;
 	decltype(clientFds) bad;
 	for(int clientFd : clientFds){
+		int res;
 		res = write(clientFd, buffer, count);
 		if(res!=count)
 			bad.insert(clientFd);
