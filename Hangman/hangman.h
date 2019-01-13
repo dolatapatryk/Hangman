@@ -53,6 +53,7 @@ protected:
     void enableButtons();
     void addButonsToArray();
     void showPic();
+    void letterButtonHit(char c);
     void aButtonHit();
     void bButtonHit();
     void cButtonHit();

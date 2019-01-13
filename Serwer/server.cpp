@@ -243,6 +243,12 @@ void readPoll() {
 				readMessage(whatToWait[i].fd);
 			}
 		}
+		if(whatToWait[i].revents & POLLHUP) {
+			removePlayer(whatToWait[i].fd);
+		}
+		if(whatToWait[i].revents & POLLERR) {
+			removePlayer(whatToWait[i].fd);
+		}
 	}
 }
 
