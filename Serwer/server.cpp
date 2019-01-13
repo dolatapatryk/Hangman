@@ -43,12 +43,11 @@ int servFd;
 //struct gameProperties game;
 Game *game = new Game();
 
-int fdsCounter = 1;
-
 // client sockets
 std::unordered_set<int> clientFds;
 pollfd whatToWait[MAX_PLAYERS + 1] {};
 map<char, map<int, long>> lettersSent;
+std::unordered_set<char> handledLetters;
 map<char, map<int, bool>> confirmationAboutDisablingLetter;
 
 // handles SIGINT
@@ -124,6 +123,10 @@ int main(int argc, char ** argv){
 	res = listen(servFd, 1);
 	if(res) error(1, errno, "listen failed");
 	
+	for(int i = 0; i < MAX_PLAYERS + 1; i++) {
+		whatToWait[i].fd = 0;
+		whatToWait[i].events = POLLIN;
+	}
 	whatToWait[0].fd = servFd;
 	whatToWait[0].events = POLLIN;
 	printf("odpalono serwer\n");
@@ -138,6 +141,7 @@ int main(int argc, char ** argv){
 		if(game->checkPlayersReady()) {
 			puts("gracze gotowi");
 			lettersSent.clear();
+			handledLetters.clear();
 			game->newGame();
 			cout<<"haslo: "<<game->getWord()<<endl<<flush;
 			sendWordAndRanking();
@@ -181,17 +185,15 @@ void ctrl_c(int){
 }
 
 void sendToAll(char * buffer, int count){
-	int res;
 	decltype(clientFds) bad;
 	for(int clientFd : clientFds){
+		int res;
 		res = write(clientFd, buffer, count);
 		if(res!=count)
 			bad.insert(clientFd);
 	}
 	for(int clientFd : bad){
-		printf("removing %d\n", clientFd);
-		clientFds.erase(clientFd);
-		close(clientFd);
+		removePlayer(clientFd);
 	}
 }
 
@@ -199,9 +201,7 @@ void send(int fd, char * buffer, int count){
 	int res;
 	res = write(fd, buffer, count);
 	if(res != count) {
-		printf("removing %d\n", fd);
-		clientFds.erase(fd);
-		close(fd);
+		removePlayer(fd);
 	}
 }
 
@@ -216,9 +216,12 @@ void acceptNewConnection() {
 		
 		// add client to all clients set
 		clientFds.insert(clientFd);
-		whatToWait[fdsCounter].fd = clientFd;
-		whatToWait[fdsCounter].events = POLLIN;
-		fdsCounter++;
+		for(int i = 1; i < MAX_PLAYERS + 1; i++) {
+			if(whatToWait[i].fd == 0) {
+				whatToWait[i].fd = clientFd;
+				break;
+			}
+		}
 
 		Player *newPlayer = new Player(clientFd);
 		game->addPlayer(newPlayer);
@@ -234,13 +237,23 @@ void acceptNewConnection() {
 }
 
 void readPoll() {
-	poll(whatToWait, MAX_PLAYERS + 1, -1);
-	for(int i = 0; i < fdsCounter; i++) {
-		if(whatToWait[i].revents & POLLIN) {
-			if(whatToWait[i].fd == servFd) {
-				acceptNewConnection();
-			} else {
-				readMessage(whatToWait[i].fd);
+	int ready = poll(whatToWait, MAX_PLAYERS + 1, -1);
+	if(ready > 0) {
+		for(pollfd & description : whatToWait) {
+			if(description.fd == 0)
+				continue;
+			if(description.revents & POLLIN) {
+				if(description.fd == servFd) {
+					acceptNewConnection();
+				} else {
+					readMessage(description.fd);
+				}
+			}
+			if(description.revents & POLLHUP) {
+				removePlayer(description.fd);
+			}
+			if(description.revents & POLLERR) {
+				removePlayer(description.fd);
 			}
 		}
 	}
@@ -255,7 +268,7 @@ void readMessage(int fd) {
 		printf("buffer: %s\n", buffer);
 		if(buffer[0] == PLAYER_READY) {
 			game->setPlayerReady(fd);
-			if(!game->isStarted())
+			if(!game->checkPlayersReady())
 				sendRanking();
 		} else if (buffer[0] >= 'A' && buffer[0] <= 'Z' && game->isStarted()) {
 			getLetterSendTime(buffer, fd);
@@ -269,10 +282,13 @@ void removePlayer(int clientFd) {
 	clientFds.erase(clientFd);
 	close(clientFd);
 	game->removePlayer(clientFd);
+	for(int i = 0; i < MAX_PLAYERS + 1; i++) {
+		if(whatToWait[i].fd == clientFd) {
+			whatToWait[i].fd = 0;
+			break;
+		}
+	}
 	sendRanking();
-	// if(game->getPlayers().size() < 2) {
-	// 	game->setStarted(false);
-	// }
 }
 
 void handleLetter(char letter, int clientFd) {
@@ -280,17 +296,22 @@ void handleLetter(char letter, int clientFd) {
 	int points = game->calculatePoints(letter);
 	int fd = checkWhoWasFirst(letter);
 	Player *player = game->getPlayers().find(fd)->second;
-	if(points == 0) {
-		player->loseLife();
-		if(player->getLifes() == 0)
-			player->subtractPoints(POINTS_TO_SUBTRACT_WHEN_LOSE_ALL_LIFES);
-	} else {
-		player->addPoints(points);
-	}
-	if(!checkIfGameEnded()) {
-		for(int fileDesc : clientFds) {
-			sendLetterWordRanking(letter, fileDesc);
+
+	auto findLetterHandled = handledLetters.find(letter);
+	if(!(findLetterHandled != handledLetters.end())) {
+		if(points == 0) {
+			player->loseLife();
+			if(player->getLifes() == 0)
+				player->subtractPoints(POINTS_TO_SUBTRACT_WHEN_LOSE_ALL_LIFES);
+		} else {
+			player->addPoints(points);
 		}
+		if(!checkIfGameEnded()) {
+			for(int fileDesc : clientFds) {
+				sendLetterWordRanking(letter, fileDesc);
+			}
+		}
+		handledLetters.insert(letter);
 	}
 		
 }
@@ -376,6 +397,8 @@ void getLetterSendTime(char * buffer, int clientFd) {
 		lettersSent.insert(make_pair(letter, clientsWithTimes));
 	}
 
+	delete timeChar;
+
 	// map<char, map<int, bool>>::iterator iter = confirmationAboutDisablingLetter.find(letter);
 	// if(iter != confirmationAboutDisablingLetter.end()) {
 	// 	iter->second.insert(make_pair(clientFd, false));
@@ -449,6 +472,11 @@ bool checkIfGameEnded() {
 		game->endGame();
 		puts("wygrana");
 		sendEndGameAndWinOrLoss(true);
+		return true;
+	}
+	if(clientFds.size() == 0) {
+		game->endGame();
+		puts("brak graczy");
 		return true;
 	}
 	return false;

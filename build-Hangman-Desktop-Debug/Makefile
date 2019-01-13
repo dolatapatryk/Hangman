@@ -78,7 +78,6 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/modules/qt_KConfigCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KConfigGui.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KConfigWidgets.pri \
-		/usr/lib/qt/mkspecs/modules/qt_KContacts.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCoreAddons.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCrash.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KDBusAddons.pri \
@@ -93,7 +92,6 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/modules/qt_KHtml.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KI18n.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIconThemes.pri \
-		/usr/lib/qt/mkspecs/modules/qt_KIdentityManagement.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIdleTime.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIOCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIOFileWidgets.pri \
@@ -114,7 +112,6 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/modules/qt_KParts.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KPeople.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KPeopleWidgets.pri \
-		/usr/lib/qt/mkspecs/modules/qt_KPIMTextEdit.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KPty.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KRunner.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KScreen.pri \
@@ -233,7 +230,6 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/modules/qt_lib_xml_private.pri \
 		/usr/lib/qt/mkspecs/modules/qt_lib_xmlpatterns.pri \
 		/usr/lib/qt/mkspecs/modules/qt_lib_xmlpatterns_private.pri \
-		/usr/lib/qt/mkspecs/modules/qt_Libkleo.pri \
 		/usr/lib/qt/mkspecs/modules/qt_ModemManagerQt.pri \
 		/usr/lib/qt/mkspecs/modules/qt_NetworkManagerQt.pri \
 		/usr/lib/qt/mkspecs/modules/qt_phonon4qt5.pri \
@@ -303,7 +299,6 @@ Makefile: ../Hangman/Hangman.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/l
 		/usr/lib/qt/mkspecs/modules/qt_KConfigCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KConfigGui.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KConfigWidgets.pri \
-		/usr/lib/qt/mkspecs/modules/qt_KContacts.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCoreAddons.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KCrash.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KDBusAddons.pri \
@@ -318,7 +313,6 @@ Makefile: ../Hangman/Hangman.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/l
 		/usr/lib/qt/mkspecs/modules/qt_KHtml.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KI18n.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIconThemes.pri \
-		/usr/lib/qt/mkspecs/modules/qt_KIdentityManagement.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIdleTime.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIOCore.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KIOFileWidgets.pri \
@@ -339,7 +333,6 @@ Makefile: ../Hangman/Hangman.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/l
 		/usr/lib/qt/mkspecs/modules/qt_KParts.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KPeople.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KPeopleWidgets.pri \
-		/usr/lib/qt/mkspecs/modules/qt_KPIMTextEdit.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KPty.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KRunner.pri \
 		/usr/lib/qt/mkspecs/modules/qt_KScreen.pri \
@@ -458,7 +451,6 @@ Makefile: ../Hangman/Hangman.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/l
 		/usr/lib/qt/mkspecs/modules/qt_lib_xml_private.pri \
 		/usr/lib/qt/mkspecs/modules/qt_lib_xmlpatterns.pri \
 		/usr/lib/qt/mkspecs/modules/qt_lib_xmlpatterns_private.pri \
-		/usr/lib/qt/mkspecs/modules/qt_Libkleo.pri \
 		/usr/lib/qt/mkspecs/modules/qt_ModemManagerQt.pri \
 		/usr/lib/qt/mkspecs/modules/qt_NetworkManagerQt.pri \
 		/usr/lib/qt/mkspecs/modules/qt_phonon4qt5.pri \
@@ -521,7 +513,6 @@ Makefile: ../Hangman/Hangman.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/l
 /usr/lib/qt/mkspecs/modules/qt_KConfigCore.pri:
 /usr/lib/qt/mkspecs/modules/qt_KConfigGui.pri:
 /usr/lib/qt/mkspecs/modules/qt_KConfigWidgets.pri:
-/usr/lib/qt/mkspecs/modules/qt_KContacts.pri:
 /usr/lib/qt/mkspecs/modules/qt_KCoreAddons.pri:
 /usr/lib/qt/mkspecs/modules/qt_KCrash.pri:
 /usr/lib/qt/mkspecs/modules/qt_KDBusAddons.pri:
@@ -536,7 +527,6 @@ Makefile: ../Hangman/Hangman.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/l
 /usr/lib/qt/mkspecs/modules/qt_KHtml.pri:
 /usr/lib/qt/mkspecs/modules/qt_KI18n.pri:
 /usr/lib/qt/mkspecs/modules/qt_KIconThemes.pri:
-/usr/lib/qt/mkspecs/modules/qt_KIdentityManagement.pri:
 /usr/lib/qt/mkspecs/modules/qt_KIdleTime.pri:
 /usr/lib/qt/mkspecs/modules/qt_KIOCore.pri:
 /usr/lib/qt/mkspecs/modules/qt_KIOFileWidgets.pri:
@@ -557,7 +547,6 @@ Makefile: ../Hangman/Hangman.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/l
 /usr/lib/qt/mkspecs/modules/qt_KParts.pri:
 /usr/lib/qt/mkspecs/modules/qt_KPeople.pri:
 /usr/lib/qt/mkspecs/modules/qt_KPeopleWidgets.pri:
-/usr/lib/qt/mkspecs/modules/qt_KPIMTextEdit.pri:
 /usr/lib/qt/mkspecs/modules/qt_KPty.pri:
 /usr/lib/qt/mkspecs/modules/qt_KRunner.pri:
 /usr/lib/qt/mkspecs/modules/qt_KScreen.pri:
@@ -676,7 +665,6 @@ Makefile: ../Hangman/Hangman.pro /usr/lib/qt/mkspecs/linux-g++/qmake.conf /usr/l
 /usr/lib/qt/mkspecs/modules/qt_lib_xml_private.pri:
 /usr/lib/qt/mkspecs/modules/qt_lib_xmlpatterns.pri:
 /usr/lib/qt/mkspecs/modules/qt_lib_xmlpatterns_private.pri:
-/usr/lib/qt/mkspecs/modules/qt_Libkleo.pri:
 /usr/lib/qt/mkspecs/modules/qt_ModemManagerQt.pri:
 /usr/lib/qt/mkspecs/modules/qt_NetworkManagerQt.pri:
 /usr/lib/qt/mkspecs/modules/qt_phonon4qt5.pri:
